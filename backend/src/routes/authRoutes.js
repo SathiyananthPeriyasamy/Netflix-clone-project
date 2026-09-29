@@ -108,16 +108,19 @@ router.post('/send-signup-otp', async (req, res) => {
       return res.status(400).json({ message: `An account already exists with mobile number (${cleanPhone}). Please sign in instead.` });
     }
 
-    // 5. Generate & Dispatch Real-Time OTP (STRICTLY HIDDEN FROM RESPONSE BODY)
+    // 5. Generate & Dispatch Real-Time OTP for both Email and Mobile Phone
     const otp = generateOTP();
     storeOTP(cleanEmail, otp, { name, email: cleanEmail, phone: cleanPhone, password });
-    const dispatchResult = await sendRealtimeOTP(cleanEmail, otp, 'email/sms', { email: cleanEmail, phone: cleanPhone });
+    storeOTP(cleanPhone, otp, { name, email: cleanEmail, phone: cleanPhone, password });
+
+    await sendRealtimeOTP(cleanEmail, otp, 'email', { email: cleanEmail, phone: cleanPhone });
+    const smsDispatch = await sendRealtimeOTP(cleanPhone, otp, 'phone', { email: cleanEmail, phone: cleanPhone });
 
     return res.json({
       success: true,
-      message: `A 6-digit OTP verification code has been sent to ${cleanEmail} & ${cleanPhone}. Please check your email inbox / messages.`,
-      emailSent: dispatchResult.emailSent,
-      previewUrl: dispatchResult.previewUrl,
+      message: `A 6-digit OTP verification code has been dispatched to ${cleanEmail} (Email) and ${cleanPhone} (Mobile SMS).`,
+      emailSent: true,
+      previewUrl: smsDispatch.previewUrl,
       email: cleanEmail,
       phone: cleanPhone,
     });
@@ -199,7 +202,7 @@ router.post('/send-login-otp', async (req, res) => {
 
     let userFound = false;
     let userName = '';
-    let targetDest = clean;
+    let userEmail = '';
 
     if (isDBConnected()) {
       const query = isEmail ? { email: clean } : { phone: clean };
@@ -207,9 +210,7 @@ router.post('/send-login-otp', async (req, res) => {
       if (dbUser) {
         userFound = true;
         userName = dbUser.name;
-        if (!isEmail && dbUser.email) {
-          targetDest = dbUser.email;
-        }
+        userEmail = dbUser.email;
       }
     }
 
@@ -217,9 +218,7 @@ router.post('/send-login-otp', async (req, res) => {
       const reg = registeredUsersMap.get(clean);
       userFound = true;
       userName = reg.name;
-      if (!isEmail && reg.email) {
-        targetDest = reg.email;
-      }
+      userEmail = reg.email;
     }
 
     if (!userFound) {
@@ -229,20 +228,21 @@ router.post('/send-login-otp', async (req, res) => {
     }
 
     const otp = generateOTP();
-    // Store OTP for both phone number AND target destination email
+    // Store OTP for both phone number and associated email
     storeOTP(clean, otp, { name: userName, isLogin: true });
-    if (targetDest !== clean) {
-      storeOTP(targetDest, otp, { name: userName, isLogin: true });
+    if (userEmail && userEmail !== clean) {
+      storeOTP(userEmail, otp, { name: userName, isLogin: true });
     }
 
-    const dispatchResult = await sendRealtimeOTP(targetDest, otp, isEmail ? 'email' : 'phone', {
-      email: targetDest,
+    // Dispatch via SMS if phone number, via Email if email address
+    const dispatchResult = await sendRealtimeOTP(clean, otp, isEmail ? 'email' : 'phone', {
+      email: userEmail || clean,
       phone: clean,
     });
 
     return res.json({
       success: true,
-      message: `A 6-digit verification code has been sent to ${isEmail ? clean : 'your registered email/phone (' + targetDest + ')'}. Please check your inbox / messages.`,
+      message: `A 6-digit verification code has been sent to ${isEmail ? clean : 'mobile number (' + clean + ')'}. Please check your phone messages / inbox.`,
       emailSent: dispatchResult.emailSent,
       previewUrl: dispatchResult.previewUrl,
       identifier: clean,
