@@ -324,20 +324,8 @@ export const Login = () => {
                       <span>OTP Sent Successfully!</span>
                     </div>
                     <p className="text-gray-300 leading-relaxed">
-                      A 6-digit OTP verification code from <strong className="text-white">no-reply@netflix.com</strong> has been sent to <strong className="text-white">{identifier}</strong>. Please check your inbox.
+                      A 6-digit OTP verification code has been sent to <strong className="text-white">{identifier}</strong>. Please check your inbox / messages.
                     </p>
-
-                    {previewUrl && (
-                      <a
-                        href={previewUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 mt-2 bg-emerald-500 hover:bg-emerald-600 text-black font-extrabold px-3 py-1.5 rounded-lg text-xs transition-colors"
-                      >
-                        <span>Open Webmail Inbox Preview</span>
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-                    )}
                   </div>
 
                   <div>
@@ -431,25 +419,14 @@ export const Login = () => {
                       <span>Reset OTP Dispatched!</span>
                     </div>
                     <p className="text-gray-300 text-[11px]">
-                      A 6-digit reset code from <strong className="text-white">no-reply@netflix.com</strong> was sent to <strong className="text-white">{identifier}</strong>.
+                      A 6-digit reset code has been sent to <strong className="text-white">{identifier}</strong>.
                     </p>
 
-                    {previewUrl && (
-                      <a
-                        href={previewUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 mt-2 bg-emerald-500 hover:bg-emerald-600 text-black font-extrabold px-3 py-1.5 rounded-lg text-xs transition-colors"
-                      >
-                        <span>Open Webmail Inbox Preview</span>
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-                    )}
                     <button
                       type="button"
                       onClick={handleSendResetOtp}
                       disabled={isSubmitting}
-                      className="inline-flex items-center gap-1.5 mt-2 ml-2 bg-gray-700 hover:bg-gray-600 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition-colors"
+                      className="inline-flex items-center gap-1.5 mt-2 bg-gray-700 hover:bg-gray-600 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition-colors"
                     >
                       <span>Resend OTP</span>
                     </button>

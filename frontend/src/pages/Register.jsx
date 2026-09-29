@@ -295,20 +295,8 @@ export const Register = () => {
                   <span>OTP Sent Successfully!</span>
                 </div>
                 <p className="text-gray-300 leading-relaxed">
-                  A 6-digit OTP verification code has been sent to <strong className="text-white">{email}</strong>. Please check your email inbox to read the code.
+                  A 6-digit OTP verification code has been sent to <strong className="text-white">{email}</strong> & <strong className="text-white">{phone}</strong>. Please check your inbox / messages.
                 </p>
-
-                {previewUrl && (
-                  <a
-                    href={previewUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 mt-2 bg-emerald-500 hover:bg-emerald-600 text-black font-extrabold px-3 py-1.5 rounded-lg text-xs transition-colors"
-                  >
-                    <span>Open Mail Webmail Inbox Preview</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                )}
               </div>
 
               {error && (
