@@ -163,9 +163,94 @@ export const sendRealtimeOTP = async (identifier, otp, type = 'email', extraData
         console.log(`[MAIL PREVIEW URL] Real email message preview: ${previewUrl}`);
       }
     } else {
-      // Mobile Number mock dispatch
-      console.log(`[SMS Gateway] Mock SMS successfully dispatched to ${dest}. Content: "Your Netflix verification code is: ${otp}"`);
-      emailSent = true; 
+      // SMS DISPATCH LOGIC (Twilio / Fast2SMS API or Virtual Webmail Preview)
+      const phoneNum = dest;
+      console.log(`[SMS GATEWAY] Preparing Real SMS Dispatch to Mobile Number: ${phoneNum}...`);
+
+      const twilioSid = process.env.TWILIO_ACCOUNT_SID;
+      const twilioAuth = process.env.TWILIO_AUTH_TOKEN;
+      const twilioFrom = process.env.TWILIO_PHONE_NUMBER;
+      const fast2smsKey = process.env.FAST2SMS_API_KEY;
+
+      if (twilioSid && twilioAuth && twilioFrom) {
+        console.log(`[Twilio SMS] Sending real SMS to ${phoneNum}...`);
+        try {
+          const authString = Buffer.from(`${twilioSid}:${twilioAuth}`).toString('base64');
+          const bodyData = new URLSearchParams({
+            To: phoneNum.startsWith('+') ? phoneNum : `+91${phoneNum}`,
+            From: twilioFrom,
+            Body: `Your Netflix verification code is: ${otp}. It expires in 10 minutes.`,
+          });
+
+          const smsRes = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${twilioSid}/Messages.json`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Basic ${authString}`,
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: bodyData.toString(),
+          });
+
+          const smsData = await smsRes.json();
+          if (smsRes.ok) {
+            console.log(`[Twilio SMS SUCCESS] Real SMS delivered to ${phoneNum}! Message SID: ${smsData.sid}`);
+            emailSent = true;
+          } else {
+            console.error(`[Twilio Error]: ${smsData.message || JSON.stringify(smsData)}`);
+          }
+        } catch (smsErr) {
+          console.error(`[Twilio Exception]: ${smsErr.message}`);
+        }
+      } else if (fast2smsKey) {
+        console.log(`[Fast2SMS] Sending real SMS to ${phoneNum}...`);
+        try {
+          const cleanPhone = phoneNum.replace(/[^0-9]/g, '').slice(-10);
+          const smsRes = await fetch(`https://www.fast2sms.com/dev/bulkV2?authorization=${fast2smsKey}&route=otp&variables_values=${otp}&flash=0&numbers=${cleanPhone}`, {
+            method: 'GET',
+          });
+          const smsData = await smsRes.json();
+          if (smsData.return) {
+            console.log(`[Fast2SMS SUCCESS] Real SMS delivered to ${phoneNum}! Request ID: ${smsData.request_id}`);
+            emailSent = true;
+          } else {
+            console.error(`[Fast2SMS Error]: ${smsData.message}`);
+          }
+        } catch (fastErr) {
+          console.error(`[Fast2SMS Exception]: ${fastErr.message}`);
+        }
+      }
+
+      // If no SMS API key configured, generate virtual SMS webmail inbox link so user can view the SMS OTP code!
+      if (!emailSent) {
+        console.log(`[SMS Webmail Preview] Generating Virtual SMS Inbox Link for ${phoneNum}...`);
+        const testAccount = await nodemailer.createTestAccount();
+        const testTransporter = nodemailer.createTransport({
+          host: 'smtp.ethereal.email',
+          port: 587,
+          secure: false,
+          auth: { user: testAccount.user, pass: testAccount.pass },
+        });
+
+        const info = await testTransporter.sendMail({
+          from: senderIdentity,
+          to: `${phoneNum}@mobile-sms.netflix.com`,
+          subject: `Netflix Mobile SMS: Your Verification Code is ${otp}`,
+          html: `
+            <div style="background-color: #141414; padding: 30px; color: #ffffff; font-family: Arial, sans-serif; max-width: 450px; margin: 0 auto; border-radius: 12px; border: 2px solid #E50914;">
+              <h2 style="color: #E50914; margin-top: 0;">📱 Mobile SMS Dispatch</h2>
+              <p style="color: #cccccc;">Recipient Mobile Phone: <strong>${phoneNum}</strong></p>
+              <div style="background-color: #222; border-radius: 8px; padding: 15px; font-size: 32px; font-weight: 900; letter-spacing: 8px; color: #E50914; text-align: center; margin: 20px 0;">
+                ${otp}
+              </div>
+              <p style="color: #888; font-size: 12px;">Sent from Netflix SMS Security Gateway</p>
+            </div>
+          `,
+        });
+
+        emailSent = true;
+        previewUrl = nodemailer.getTestMessageUrl(info);
+        console.log(`[SMS PREVIEW URL] SMS message preview for ${phoneNum}: ${previewUrl}`);
+      }
     }
   } catch (err) {
     console.error(`[SMTP Dispatch Error]: ${err.message}`);
