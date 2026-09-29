@@ -130,8 +130,8 @@ export const sendRealtimeOTP = async (identifier, otp, type = 'email', extraData
       });
       console.log(`[SMTP SUCCESS] Real Email delivered to inbox (${dest}) from no-reply@netflix.com! 📬`);
       emailSent = true;
-    } else {
-      // Ethereal test inbox fallback
+    } else if (dest.includes('@')) {
+      // Ethereal test inbox fallback for emails
       console.log(`[SMTP] Dispatching via webmail inbox preview for ${dest}...`);
       const testAccount = await nodemailer.createTestAccount();
       const testTransporter = nodemailer.createTransport({
@@ -162,6 +162,10 @@ export const sendRealtimeOTP = async (identifier, otp, type = 'email', extraData
       if (previewUrl) {
         console.log(`[MAIL PREVIEW URL] Real email message preview: ${previewUrl}`);
       }
+    } else {
+      // Mobile Number mock dispatch
+      console.log(`[SMS Gateway] Mock SMS successfully dispatched to ${dest}. Content: "Your Netflix verification code is: ${otp}"`);
+      emailSent = true; 
     }
   } catch (err) {
     console.error(`[SMTP Dispatch Error]: ${err.message}`);

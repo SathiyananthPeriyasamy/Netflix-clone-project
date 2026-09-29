@@ -445,6 +445,14 @@ export const Login = () => {
                         <ExternalLink className="w-3.5 h-3.5" />
                       </a>
                     )}
+                    <button
+                      type="button"
+                      onClick={handleSendResetOtp}
+                      disabled={isSubmitting}
+                      className="inline-flex items-center gap-1.5 mt-2 ml-2 bg-gray-700 hover:bg-gray-600 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition-colors"
+                    >
+                      <span>Resend OTP</span>
+                    </button>
                   </div>
 
                   <div>
@@ -467,13 +475,16 @@ export const Login = () => {
                       <input
                         type="password"
                         required
-                        minLength={6}
+                        minLength={8}
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        placeholder="Minimum 6 characters"
+                        placeholder="Minimum 8 characters"
                         className="w-full bg-[#222222] text-white rounded-lg px-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#E50914] border border-white/10"
                       />
                     </div>
+                    <p className="text-[10px] text-gray-400 mt-2 leading-relaxed">
+                      Must be at least <strong className="text-gray-300">8 characters</strong> long, including <strong className="text-gray-300">1 uppercase letter</strong>, <strong className="text-gray-300">1 lowercase letter</strong>, <strong className="text-gray-300">1 number</strong>, and <strong className="text-gray-300">1 special character</strong>.
+                    </p>
                   </div>
 
                   <button
