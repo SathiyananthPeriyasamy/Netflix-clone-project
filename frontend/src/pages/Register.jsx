@@ -214,7 +214,12 @@ export const Register = () => {
                     <input
                       type="tel"
                       required
+                      inputMode="numeric"
+                      pattern="[0-9+]*"
                       value={phone}
+                      onInput={(e) => {
+                        e.target.value = e.target.value.replace(/[^0-9+]/g, '');
+                      }}
                       onChange={(e) => setPhone(e.target.value.replace(/[^0-9+]/g, ''))}
                       placeholder="9876543210 (Numbers only)"
                       className="w-full bg-[#222222] text-white rounded-lg px-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#E50914] border border-white/10"
