@@ -47,7 +47,7 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd ~/Prime-clone-project
+            cd ~/Netflix-clone-project
             git pull origin master || git pull origin main
             docker compose build --no-cache
             docker compose up -d --force-recreate
