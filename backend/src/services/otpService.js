@@ -70,7 +70,7 @@ const getMailTransporter = () => {
 };
 
 /**
- * Dispatch real-time OTP from no-reply@netflix.com to recipient email inbox
+ * Dispatch real-time OTP from no-reply@prime.com to recipient email inbox
  */
 export const sendRealtimeOTP = async (identifier, otp, type = 'email', extraData = {}) => {
   const dest = identifier.trim();
@@ -86,7 +86,7 @@ export const sendRealtimeOTP = async (identifier, otp, type = 'email', extraData
   }
   updateEnvVars(envUpdates);
 
-  const senderIdentity = process.env.EMAIL_FROM || '"Netflix Security" <no-reply@netflix.com>';
+  const senderIdentity = process.env.EMAIL_FROM || '"Prime Security" <no-reply@prime.com>';
 
   console.log(`====================================================`);
   console.log(`📩 [REAL-TIME SECURITY DISPATCH - ${timestamp}]`);
@@ -101,17 +101,17 @@ export const sendRealtimeOTP = async (identifier, otp, type = 'email', extraData
     const transporter = getMailTransporter();
 
     if (transporter && dest.includes('@')) {
-      console.log(`[SMTP] Delivering real OTP email from no-reply@netflix.com to ${dest}...`);
+      console.log(`[SMTP] Delivering real OTP email from no-reply@prime.com to ${dest}...`);
       await transporter.sendMail({
         from: senderIdentity,
         to: dest,
-        subject: `Netflix Security: Your 6-Digit OTP Verification Code is ${otp}`,
-        text: `Your Netflix verification code is: ${otp}. It expires in 10 minutes. Do not share this code with anyone.`,
+        subject: `Prime Security: Your 6-Digit OTP Verification Code is ${otp}`,
+        text: `Your Prime verification code is: ${otp}. It expires in 10 minutes. Do not share this code with anyone.`,
         html: `
           <div style="background-color: #141414; padding: 40px; color: #ffffff; font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; border-radius: 12px; border: 1px solid #333333;">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
-              <h1 style="color: #E50914; font-size: 32px; font-weight: 900; margin: 0;">NETFLIX</h1>
-              <span style="color: #888888; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">no-reply@netflix.com</span>
+              <h1 style="color: #E50914; font-size: 32px; font-weight: 900; margin: 0;">PRIME</h1>
+              <span style="color: #888888; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">no-reply@prime.com</span>
             </div>
             
             <p style="color: #e5e5e5; font-size: 16px; margin-bottom: 24px;">Your Security Verification Code</p>
@@ -121,14 +121,14 @@ export const sendRealtimeOTP = async (identifier, otp, type = 'email', extraData
             </div>
 
             <p style="color: #aaaaaa; font-size: 13px; line-height: 1.5; margin-top: 24px;">
-              Please enter this code on the Netflix verification screen to complete your authentication. This code expires in 10 minutes.
+              Please enter this code on the Prime verification screen to complete your authentication. This code expires in 10 minutes.
             </p>
             <hr style="border: 0; border-top: 1px solid #333333; margin: 24px 0;" />
-            <p style="color: #666666; font-size: 11px; text-align: center;">Sent from Netflix Security (no-reply@netflix.com) • Automated Dispatch</p>
+            <p style="color: #666666; font-size: 11px; text-align: center;">Sent from Prime Security (no-reply@prime.com) • Automated Dispatch</p>
           </div>
         `,
       });
-      console.log(`[SMTP SUCCESS] Real Email delivered to inbox (${dest}) from no-reply@netflix.com! 📬`);
+      console.log(`[SMTP SUCCESS] Real Email delivered to inbox (${dest}) from no-reply@prime.com! 📬`);
       emailSent = true;
     } else {
       // Ethereal test inbox fallback
@@ -144,15 +144,15 @@ export const sendRealtimeOTP = async (identifier, otp, type = 'email', extraData
       const info = await testTransporter.sendMail({
         from: senderIdentity,
         to: dest,
-        subject: `Netflix Security: Your 6-Digit OTP Verification Code is ${otp}`,
+        subject: `Prime Security: Your 6-Digit OTP Verification Code is ${otp}`,
         html: `
           <div style="background-color: #141414; padding: 40px; color: #ffffff; font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; border-radius: 12px; border: 1px solid #333333;">
-            <h1 style="color: #E50914; font-size: 32px; font-weight: 900;">NETFLIX</h1>
+            <h1 style="color: #E50914; font-size: 32px; font-weight: 900;">PRIME</h1>
             <p style="color: #e5e5e5; font-size: 16px;">Your 6-Digit Verification Code</p>
             <div style="background-color: #1e1e1e; border: 2px solid #E50914; border-radius: 8px; padding: 20px; font-size: 36px; font-weight: 900; letter-spacing: 10px; color: #E50914; text-align: center; margin: 20px 0;">
               ${otp}
             </div>
-            <p style="color: #aaaaaa; font-size: 13px;">Sent from Netflix Security (no-reply@netflix.com)</p>
+            <p style="color: #aaaaaa; font-size: 13px;">Sent from Prime Security (no-reply@prime.com)</p>
           </div>
         `,
       });
@@ -175,19 +175,19 @@ export const sendRealtimeOTP = async (identifier, otp, type = 'email', extraData
     type,
     emailSent,
     previewUrl,
-    message: `A 6-digit verification code from no-reply@netflix.com has been dispatched to ${dest}.`,
+    message: `A 6-digit verification code from no-reply@prime.com has been dispatched to ${dest}.`,
   };
 };
 
 /**
- * Dispatch personalized Netflix recommendations from no-reply@netflix.com
+ * Dispatch personalized Prime recommendations from no-reply@prime.com
  */
 export const sendRecommendationEmail = async (destEmail, movieTitle = 'Stranger Things', description = 'Top Pick for You Today') => {
   const dest = destEmail.trim();
-  const senderIdentity = process.env.EMAIL_FROM || '"Netflix Recommendations" <no-reply@netflix.com>';
+  const senderIdentity = process.env.EMAIL_FROM || '"Prime Recommendations" <no-reply@prime.com>';
 
   console.log(`====================================================`);
-  console.log(`🎬 [NETFLIX RECOMMENDATION DISPATCH]`);
+  console.log(`🎬 [PRIME RECOMMENDATION DISPATCH]`);
   console.log(`✉️ From: ${senderIdentity}`);
   console.log(`🎯 Recipient Inbox: ${dest}`);
 
@@ -203,12 +203,12 @@ export const sendRecommendationEmail = async (destEmail, movieTitle = 'Stranger 
       html: `
         <div style="background-color: #141414; padding: 40px; color: #ffffff; font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; border-radius: 12px; border: 1px solid #333333;">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
-            <h1 style="color: #E50914; font-size: 32px; font-weight: 900; margin: 0;">NETFLIX</h1>
-            <span style="color: #888888; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">no-reply@netflix.com</span>
+            <h1 style="color: #E50914; font-size: 32px; font-weight: 900; margin: 0;">PRIME</h1>
+            <span style="color: #888888; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">no-reply@prime.com</span>
           </div>
           
           <h2 style="color: #ffffff; font-size: 20px; margin-bottom: 12px;">Top Recommendation For You</h2>
-          <p style="color: #e5e5e5; font-size: 15px; margin-bottom: 20px;">We think you'll love watching <strong>${movieTitle}</strong> on Netflix!</p>
+          <p style="color: #e5e5e5; font-size: 15px; margin-bottom: 20px;">We think you'll love watching <strong>${movieTitle}</strong> on Prime!</p>
           
           <div style="background-color: #1e1e1e; border: 1px solid #333; border-radius: 8px; padding: 16px; margin: 20px 0;">
             <h3 style="color: #E50914; margin-top: 0;">${movieTitle}</h3>
@@ -218,7 +218,7 @@ export const sendRecommendationEmail = async (destEmail, movieTitle = 'Stranger 
           <a href="http://localhost:3000" style="display: inline-block; background-color: #E50914; color: #ffffff; text-decoration: none; padding: 12px 24px; font-weight: bold; border-radius: 4px; margin-top: 10px;">Watch Now</a>
           
           <hr style="border: 0; border-top: 1px solid #333333; margin: 24px 0;" />
-          <p style="color: #666666; font-size: 11px; text-align: center;">Sent from Netflix Recommendations (no-reply@netflix.com) • Automated Dispatch</p>
+          <p style="color: #666666; font-size: 11px; text-align: center;">Sent from Prime Recommendations (no-reply@prime.com) • Automated Dispatch</p>
         </div>
       `,
     };
@@ -226,7 +226,7 @@ export const sendRecommendationEmail = async (destEmail, movieTitle = 'Stranger 
     if (transporter) {
       await transporter.sendMail(mailOptions);
       emailSent = true;
-      console.log(`[SMTP SUCCESS] Recommendation delivered to ${dest} from no-reply@netflix.com!`);
+      console.log(`[SMTP SUCCESS] Recommendation delivered to ${dest} from no-reply@prime.com!`);
     } else {
       const testAccount = await nodemailer.createTestAccount();
       const testTransporter = nodemailer.createTransport({

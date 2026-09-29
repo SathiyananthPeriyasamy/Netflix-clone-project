@@ -7,7 +7,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        netflix: {
+        prime: {
           red: '#E50914',
           dark: '#141414',
           black: '#000000',

@@ -30,7 +30,7 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: 'UP',
     timestamp: new Date().toISOString(),
-    service: 'Netflix-Backend-API',
+    service: 'Prime-Backend-API',
     environment: process.env.NODE_ENV || 'development',
     uptime: process.uptime(),
   });
@@ -39,7 +39,7 @@ app.get('/api/health', (req, res) => {
 // Root welcome endpoint
 app.get('/', (req, res) => {
   res.json({
-    message: 'Welcome to Netflix Clone DevOps REST API',
+    message: 'Welcome to Prime Clone DevOps REST API',
     endpoints: {
       health: '/api/health',
       auth: '/api/auth',
@@ -58,7 +58,7 @@ const startServer = async () => {
   await connectDB();
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`====================================================`);
-    console.log(`🚀 Netflix DevOps Backend Server running on port ${PORT}`);
+    console.log(`🚀 Prime DevOps Backend Server running on port ${PORT}`);
     console.log(`📡 Healthcheck URL: http://localhost:${PORT}/api/health`);
     console.log(`====================================================`);
   });

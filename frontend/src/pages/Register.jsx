@@ -120,7 +120,7 @@ export const Register = () => {
       {/* Header */}
       <header className="relative z-20 px-6 md:px-12 py-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-[#E50914] font-black text-3xl tracking-tighter">NETFLIX</span>
+          <span className="text-[#E50914] font-black text-3xl tracking-tighter">PRIME</span>
         </div>
         <div className="flex items-center gap-3">
           <button
@@ -133,7 +133,7 @@ export const Register = () => {
           </button>
           <button
             onClick={() => navigate('/signin')}
-            className="netflix-btn-red text-xs py-1.5 px-4 font-semibold"
+            className="prime-btn-red text-xs py-1.5 px-4 font-semibold"
           >
             Sign In
           </button>
@@ -273,7 +273,7 @@ export const Register = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full netflix-btn-red py-3 justify-center font-bold text-base mt-2 shadow-lg hover:shadow-[0_0_20px_rgba(229,9,20,0.6)]"
+                  className="w-full prime-btn-red py-3 justify-center font-bold text-base mt-2 shadow-lg hover:shadow-[0_0_20px_rgba(229,9,20,0.6)]"
                 >
                   {isSubmitting ? 'Verifying & Sending OTP...' : 'Send OTP Code'}
                 </button>
@@ -335,7 +335,7 @@ export const Register = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting || otpInput.length < 6}
-                  className="w-full netflix-btn-red py-3 justify-center font-bold text-base shadow-lg disabled:opacity-50"
+                  className="w-full prime-btn-red py-3 justify-center font-bold text-base shadow-lg disabled:opacity-50"
                 >
                   {isSubmitting ? 'Verifying OTP...' : 'Verify OTP & Complete Registration'}
                 </button>
@@ -376,7 +376,7 @@ export const Register = () => {
       </main>
 
       <footer className="relative z-20 px-6 py-4 bg-black/80 text-center text-xs text-gray-500 border-t border-white/5">
-        © 2026 Netflix Clone. All rights reserved.
+        © 2026 Prime Clone. All rights reserved.
       </footer>
     </div>
   );

@@ -1,7 +1,7 @@
 {
-  "name": "netflix-backend",
+  "name": "prime-backend",
   "version": "1.0.0",
-  "description": "Netflix Clone Backend REST API for DevOps Practice",
+  "description": "Prime Clone Backend REST API for DevOps Practice",
   "main": "src/server.js",
   "type": "module",
   "scripts": {

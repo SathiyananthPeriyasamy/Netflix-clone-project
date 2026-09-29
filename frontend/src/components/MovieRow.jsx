@@ -47,7 +47,7 @@ export const MovieRow = ({ title, movies, onSelectMovie, watchlist = [], onToggl
               <div
                 key={movie._id || movie.title}
                 onClick={() => onSelectMovie(movie)}
-                className="netflix-card flex-none w-48 sm:w-56 md:w-64 bg-[#181818] border border-white/10 rounded-xl overflow-hidden shadow-xl group/card transition-all duration-300"
+                className="prime-card flex-none w-48 sm:w-56 md:w-64 bg-[#181818] border border-white/10 rounded-xl overflow-hidden shadow-xl group/card transition-all duration-300"
               >
                 {/* Poster Cover */}
                 <div className="relative aspect-[16/9] w-full overflow-hidden bg-gray-900">

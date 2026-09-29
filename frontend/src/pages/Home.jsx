@@ -230,8 +230,8 @@ export const Home = () => {
       {/* Footer */}
       <footer className="mt-20 border-t border-white/10 pt-8 px-6 md:px-12 text-gray-500 text-xs flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-gray-400 font-semibold mb-1">Netflix Clone</p>
-          <p>© 2026 Netflix Clone. All rights reserved.</p>
+          <p className="text-gray-400 font-semibold mb-1">Prime Clone</p>
+          <p>© 2026 Prime Clone. All rights reserved.</p>
         </div>
         <div className="bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 rounded-lg text-emerald-400 text-xs font-medium">
           ✓ Real-Time Security & Verification Active
