@@ -155,9 +155,6 @@ export const Login = () => {
       <header className="relative z-20 px-6 md:px-12 py-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-[#E50914] font-black text-3xl tracking-tighter">NETFLIX</span>
-          <span className="bg-[#E50914]/20 border border-[#E50914]/50 text-[#E50914] text-[10px] font-bold px-2 py-0.5 rounded tracking-widest uppercase">
-            DEVOPS AUTH
-          </span>
         </div>
       </header>
 
@@ -246,7 +243,7 @@ export const Login = () => {
                     required
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
-                    placeholder="user@example.com or +919876543210"
+                    placeholder="Enter your email or phone number"
                     className="w-full bg-[#222222] text-white rounded-lg px-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#E50914] border border-white/10"
                   />
                 </div>
@@ -275,7 +272,7 @@ export const Login = () => {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
+                    placeholder="Enter your password"
                     className="w-full bg-[#222222] text-white rounded-lg px-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#E50914] border border-white/10"
                   />
                 </div>
@@ -305,7 +302,7 @@ export const Login = () => {
                         required
                         value={identifier}
                         onChange={(e) => setIdentifier(e.target.value)}
-                        placeholder="sathiya@gmail.com or +919876543210"
+                        placeholder="Enter your registered email or phone number"
                         className="w-full bg-[#222222] text-white rounded-lg px-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#E50914] border border-white/10"
                       />
                     </div>
@@ -397,7 +394,7 @@ export const Login = () => {
                         required
                         value={identifier}
                         onChange={(e) => setIdentifier(e.target.value)}
-                        placeholder="sathiyacse1@gmail.com or mobile number"
+                        placeholder="Enter registered email or phone number"
                         className="w-full bg-[#222222] text-white rounded-lg px-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#E50914] border border-white/10"
                       />
                     </div>
@@ -500,7 +497,7 @@ export const Login = () => {
           )}
 
           <div className="mt-6 text-sm text-gray-400 flex items-center justify-between">
-            <span>New to Netflix DevOps?</span>
+            <span>New to Netflix?</span>
             <button
               onClick={() => navigate('/signup')}
               className="text-white hover:underline font-semibold flex items-center gap-1 text-xs"
@@ -512,7 +509,7 @@ export const Login = () => {
       </main>
 
       <footer className="relative z-20 px-6 py-4 bg-black/80 text-center text-xs text-gray-500 border-t border-white/5">
-        Netflix DevOps Practice App • Real Email Inbox Security Dispatch
+        © 2026 Netflix Clone. All rights reserved.
       </footer>
     </div>
   );

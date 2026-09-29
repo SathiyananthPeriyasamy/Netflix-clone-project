@@ -199,6 +199,7 @@ router.post('/send-login-otp', async (req, res) => {
 
     let userFound = false;
     let userName = '';
+    let targetDest = clean;
 
     if (isDBConnected()) {
       const query = isEmail ? { email: clean } : { phone: clean };
@@ -206,12 +207,19 @@ router.post('/send-login-otp', async (req, res) => {
       if (dbUser) {
         userFound = true;
         userName = dbUser.name;
+        if (!isEmail && dbUser.email) {
+          targetDest = dbUser.email;
+        }
       }
     }
 
     if (!userFound && registeredUsersMap.has(clean)) {
+      const reg = registeredUsersMap.get(clean);
       userFound = true;
-      userName = registeredUsersMap.get(clean).name;
+      userName = reg.name;
+      if (!isEmail && reg.email) {
+        targetDest = reg.email;
+      }
     }
 
     if (!userFound) {
@@ -221,12 +229,20 @@ router.post('/send-login-otp', async (req, res) => {
     }
 
     const otp = generateOTP();
+    // Store OTP for both phone number AND target destination email
     storeOTP(clean, otp, { name: userName, isLogin: true });
-    const dispatchResult = await sendRealtimeOTP(clean, otp, isEmail ? 'email' : 'phone', { [isEmail ? 'email' : 'phone']: clean });
+    if (targetDest !== clean) {
+      storeOTP(targetDest, otp, { name: userName, isLogin: true });
+    }
+
+    const dispatchResult = await sendRealtimeOTP(targetDest, otp, isEmail ? 'email' : 'phone', {
+      email: targetDest,
+      phone: clean,
+    });
 
     return res.json({
       success: true,
-      message: `A 6-digit OTP verification code has been sent to ${clean}. Please check your email inbox / messages.`,
+      message: `A 6-digit verification code has been sent to ${isEmail ? clean : 'your registered email/phone (' + targetDest + ')'}. Please check your inbox / messages.`,
       emailSent: dispatchResult.emailSent,
       previewUrl: dispatchResult.previewUrl,
       identifier: clean,
@@ -406,15 +422,21 @@ router.post('/send-reset-otp', async (req, res) => {
     }
 
     let userFound = false;
+    let targetDest = clean;
 
     if (isDBConnected()) {
       const query = isEmail ? { email: clean } : { phone: clean };
       const dbUser = await User.findOne(query);
-      if (dbUser) userFound = true;
+      if (dbUser) {
+        userFound = true;
+        if (!isEmail && dbUser.email) targetDest = dbUser.email;
+      }
     }
 
     if (!userFound && registeredUsersMap.has(clean)) {
+      const reg = registeredUsersMap.get(clean);
       userFound = true;
+      if (!isEmail && reg.email) targetDest = reg.email;
     }
 
     if (!userFound) {
@@ -425,11 +447,15 @@ router.post('/send-reset-otp', async (req, res) => {
 
     const otp = generateOTP();
     storeOTP(clean, otp, { isReset: true, identifier: clean });
-    const dispatchResult = await sendRealtimeOTP(clean, otp, isEmail ? 'email' : 'phone', { [isEmail ? 'email' : 'phone']: clean });
+    if (targetDest !== clean) {
+      storeOTP(targetDest, otp, { isReset: true, identifier: clean });
+    }
+
+    const dispatchResult = await sendRealtimeOTP(targetDest, otp, isEmail ? 'email' : 'phone', { email: targetDest, phone: clean });
 
     return res.json({
       success: true,
-      message: `A 6-digit password reset OTP has been sent to ${clean} from no-reply@netflix.com.`,
+      message: `A 6-digit password reset OTP has been sent to ${targetDest} from no-reply@netflix.com.`,
       emailSent: dispatchResult.emailSent,
       previewUrl: dispatchResult.previewUrl,
       identifier: clean,

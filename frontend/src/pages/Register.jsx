@@ -121,9 +121,6 @@ export const Register = () => {
       <header className="relative z-20 px-6 md:px-12 py-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-[#E50914] font-black text-3xl tracking-tighter">NETFLIX</span>
-          <span className="bg-[#E50914]/20 text-[#E50914] text-[10px] font-bold px-2 py-0.5 rounded tracking-widest uppercase border border-[#E50914]/50">
-            AUTHENTICATED OTP
-          </span>
         </div>
         <div className="flex items-center gap-3">
           <button
@@ -185,14 +182,14 @@ export const Register = () => {
                       required
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder="DevOps Engineer"
+                      placeholder="Enter full name"
                       className="w-full bg-[#222222] text-white rounded-lg px-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#E50914] border border-white/10"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-300 uppercase mb-1">Authentic Email Address</label>
+                  <label className="block text-xs font-semibold text-gray-300 uppercase mb-1">Email Address</label>
                   <div className="relative">
                     <Mail className="absolute left-3.5 top-3.5 w-4 h-4 text-gray-400" />
                     <input
@@ -200,11 +197,10 @@ export const Register = () => {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="sathiyacse1@gmail.com"
+                      placeholder="Enter email address"
                       className="w-full bg-[#222222] text-white rounded-lg px-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#E50914] border border-white/10"
                     />
                   </div>
-                  <p className="text-[11px] text-gray-400 mt-1">Must be an active email address (e.g. gmail, yahoo, outlook).</p>
                 </div>
 
                 <div>
@@ -221,11 +217,10 @@ export const Register = () => {
                         e.target.value = e.target.value.replace(/[^0-9+]/g, '');
                       }}
                       onChange={(e) => setPhone(e.target.value.replace(/[^0-9+]/g, ''))}
-                      placeholder="9876543210 (Numbers only)"
+                      placeholder="Enter mobile phone number"
                       className="w-full bg-[#222222] text-white rounded-lg px-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#E50914] border border-white/10"
                     />
                   </div>
-                  <p className="text-[11px] text-gray-400 mt-1">Numbers only (minimum 10 digits).</p>
                 </div>
 
                 <div>
@@ -238,7 +233,7 @@ export const Register = () => {
                       minLength={8}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Min 8 chars (1 uppercase, 1 lowercase, 1 number, 1 special)"
+                      placeholder="Enter password"
                       className="w-full bg-[#222222] text-white rounded-lg px-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#E50914] border border-white/10"
                     />
                   </div>
@@ -381,7 +376,7 @@ export const Register = () => {
       </main>
 
       <footer className="relative z-20 px-6 py-4 bg-black/80 text-center text-xs text-gray-500 border-t border-white/5">
-        Netflix DevOps Practice App • Real Email Inbox Security Dispatch
+        © 2026 Netflix Clone. All rights reserved.
       </footer>
     </div>
   );
