@@ -1,0 +1,519 @@
+import React, { useState, useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
+import { Lock, Mail, Phone, AlertCircle, ArrowRight, ShieldCheck, Terminal, Smartphone, MailCheck, ExternalLink, KeyRound, CheckCircle2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
+export const Login = () => {
+  const navigate = useNavigate();
+  const [loginMode, setLoginMode] = useState('password'); // 'password' | 'otp' | 'forgot'
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
+
+  // OTP Login states
+  const [otpStep, setOtpStep] = useState(1);
+  const [otpInput, setOtpInput] = useState('');
+
+  // Forgot Password states
+  const [resetStep, setResetStep] = useState(1); // 1: send OTP, 2: verify & set password
+  const [resetOtp, setResetOtp] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { loginWithPassword, sendLoginOtp, verifyLoginOtp, sendResetPasswordOtp, resetPassword } = useContext(AuthContext);
+
+  // Password Login Handler
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccessMsg('');
+    setIsSubmitting(true);
+
+    const result = await loginWithPassword(identifier, password);
+    setIsSubmitting(false);
+
+    if (!result.success) {
+      setError(result.error || 'Login failed');
+    }
+  };
+
+  // Request Real-Time OTP for Login
+  const handleSendLoginOtp = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccessMsg('');
+    setIsSubmitting(true);
+
+    if (!identifier) {
+      setIsSubmitting(false);
+      setError('Please enter your registered Email Address or Phone Number');
+      return;
+    }
+
+    const result = await sendLoginOtp(identifier);
+    setIsSubmitting(false);
+
+    if (!result.success) {
+      setError(result.error || 'Failed to send login OTP');
+      return;
+    }
+
+    setPreviewUrl(result.previewUrl || null);
+    setOtpStep(2);
+  };
+
+  // Verify Real-Time Login OTP
+  const handleVerifyLoginOtp = async (e) => {
+    e.preventDefault();
+    setError('');
+    setIsSubmitting(true);
+
+    const result = await verifyLoginOtp(identifier, otpInput);
+    setIsSubmitting(false);
+
+    if (!result.success) {
+      setError(result.error || 'Invalid OTP code');
+      return;
+    }
+
+    window.location.reload();
+  };
+
+  // Request Password Reset OTP
+  const handleSendResetOtp = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccessMsg('');
+    setIsSubmitting(true);
+
+    if (!identifier) {
+      setIsSubmitting(false);
+      setError('Please enter your registered Email Address or Phone Number');
+      return;
+    }
+
+    const result = await sendResetPasswordOtp(identifier);
+    setIsSubmitting(false);
+
+    if (!result.success) {
+      setError(result.error || 'Failed to send reset OTP');
+      return;
+    }
+
+    setPreviewUrl(result.previewUrl || null);
+    setResetStep(2);
+  };
+
+  // Submit New Password with Reset OTP
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccessMsg('');
+    setIsSubmitting(true);
+
+    if (!resetOtp || resetOtp.length < 6) {
+      setIsSubmitting(false);
+      setError('Please enter the full 6-digit OTP code sent to your mail/phone');
+      return;
+    }
+
+    if (!newPassword || newPassword.length < 6) {
+      setIsSubmitting(false);
+      setError('New password must be at least 6 characters long');
+      return;
+    }
+
+    const result = await resetPassword(identifier, resetOtp, newPassword);
+    setIsSubmitting(false);
+
+    if (!result.success) {
+      setError(result.error || 'Password reset failed');
+      return;
+    }
+
+    setPassword(newPassword);
+    setSuccessMsg(result.message || 'Password reset successfully! You can now sign in.');
+    setLoginMode('password');
+    setResetStep(1);
+    setResetOtp('');
+    setNewPassword('');
+  };
+
+  return (
+    <div
+      className="relative min-h-screen w-full bg-cover bg-center flex flex-col justify-between text-white font-sans"
+      style={{
+        backgroundImage: `url('https://assets.nflxext.com/ffe/siteui/vlv3/594ce3a3-d308-4929-92c7-010df04430e8/e60a9907-f27a-4286-[us]-perspective_alpha_website_large.jpg')`,
+      }}
+    >
+      <div className="absolute inset-0 bg-black/75 bg-gradient-to-t from-black via-black/40 to-black/80" />
+
+      {/* Header */}
+      <header className="relative z-20 px-6 md:px-12 py-6 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-[#E50914] font-black text-3xl tracking-tighter">NETFLIX</span>
+          <span className="bg-[#E50914]/20 border border-[#E50914]/50 text-[#E50914] text-[10px] font-bold px-2 py-0.5 rounded tracking-widest uppercase">
+            DEVOPS AUTH
+          </span>
+        </div>
+      </header>
+
+      {/* Main Login / Reset Box */}
+      <main className="relative z-20 flex justify-center items-center px-4 my-8">
+        <div className="w-full max-w-md bg-black/80 backdrop-blur-xl p-8 md:p-10 rounded-2xl border border-white/10 shadow-2xl animate-fade-in">
+
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="text-3xl font-extrabold text-white">
+              {loginMode === 'forgot' ? 'Reset Password' : 'Sign In'}
+            </h1>
+            {loginMode === 'forgot' && (
+              <span className="bg-[#E50914]/20 text-[#E50914] border border-[#E50914]/40 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase">
+                SECURITY RESET
+              </span>
+            )}
+          </div>
+
+          <p className="text-gray-400 text-xs mb-6">
+            {loginMode === 'forgot'
+              ? 'Verification OTP will be sent from no-reply@netflix.com'
+              : 'Choose your preferred authentication method.'}
+          </p>
+
+          {/* Login Mode Toggle Tabs (Password vs OTP vs Forgot) */}
+          <div className="grid grid-cols-2 gap-2 p-1 bg-[#222222] rounded-xl mb-6 border border-white/10">
+            <button
+              type="button"
+              onClick={() => {
+                setLoginMode('password');
+                setError('');
+                setSuccessMsg('');
+              }}
+              className={`py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${loginMode === 'password'
+                  ? 'bg-[#E50914] text-white shadow-md'
+                  : 'text-gray-400 hover:text-white'
+                }`}
+            >
+              <Lock className="w-3.5 h-3.5" />
+              <span>Password Login</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setLoginMode('otp');
+                setOtpStep(1);
+                setError('');
+                setSuccessMsg('');
+              }}
+              className={`py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${loginMode === 'otp'
+                  ? 'bg-[#E50914] text-white shadow-md'
+                  : 'text-gray-400 hover:text-white'
+                }`}
+            >
+              <Smartphone className="w-3.5 h-3.5" />
+              <span>OTP Login</span>
+            </button>
+          </div>
+
+          {/* Success Banner */}
+          {successMsg && (
+            <div className="mb-6 p-3.5 bg-emerald-500/20 border border-emerald-500/50 rounded-xl text-emerald-200 text-xs flex items-center gap-2.5 animate-fade-in shadow-lg">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>{successMsg}</span>
+            </div>
+          )}
+
+          {/* Error Banner */}
+          {error && (
+            <div className="mb-6 p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-200 text-xs flex items-center gap-2 animate-fade-in">
+              <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {/* MODE 1: PASSWORD LOGIN */}
+          {loginMode === 'password' && (
+            <form onSubmit={handlePasswordSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-gray-300 uppercase mb-1">Email or Phone Number</label>
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-3.5 w-4 h-4 text-gray-400" />
+                  <input
+                    type="text"
+                    required
+                    value={identifier}
+                    onChange={(e) => setIdentifier(e.target.value)}
+                    placeholder="user@example.com or +919876543210"
+                    className="w-full bg-[#222222] text-white rounded-lg px-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#E50914] border border-white/10"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-semibold text-gray-300 uppercase">Password</label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLoginMode('forgot');
+                      setResetStep(1);
+                      setError('');
+                      setSuccessMsg('');
+                    }}
+                    className="text-xs text-gray-400 hover:text-[#E50914] hover:underline transition-colors font-medium"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-3.5 w-4 h-4 text-gray-400" />
+                  <input
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full bg-[#222222] text-white rounded-lg px-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#E50914] border border-white/10"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full netflix-btn-red py-3 justify-center font-bold text-base mt-2 shadow-lg hover:shadow-[0_0_20px_rgba(229,9,20,0.6)]"
+              >
+                {isSubmitting ? 'Authenticating...' : 'Sign In with Password'}
+              </button>
+            </form>
+          )}
+
+          {/* MODE 2: REAL-TIME OTP LOGIN */}
+          {loginMode === 'otp' && (
+            <>
+              {otpStep === 1 ? (
+                <form onSubmit={handleSendLoginOtp} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-300 uppercase mb-1">Registered Email or Phone Number</label>
+                    <div className="relative">
+                      <Mail className="absolute left-3.5 top-3.5 w-4 h-4 text-gray-400" />
+                      <input
+                        type="text"
+                        required
+                        value={identifier}
+                        onChange={(e) => setIdentifier(e.target.value)}
+                        placeholder="sathiya@gmail.com or +919876543210"
+                        className="w-full bg-[#222222] text-white rounded-lg px-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#E50914] border border-white/10"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full netflix-btn-red py-3 justify-center font-bold text-base mt-2 shadow-lg hover:shadow-[0_0_20px_rgba(229,9,20,0.6)]"
+                  >
+                    {isSubmitting ? 'Sending OTP...' : 'Send OTP to Email / Phone'}
+                  </button>
+                </form>
+              ) : (
+                <form onSubmit={handleVerifyLoginOtp} className="space-y-4 animate-fade-in">
+                  <div className="p-4 bg-emerald-500/15 border border-emerald-500/40 rounded-xl text-emerald-300 text-xs space-y-2 shadow-lg">
+                    <div className="flex items-center gap-2 font-bold text-emerald-400">
+                      <MailCheck className="w-4 h-4" />
+                      <span>OTP Sent Successfully!</span>
+                    </div>
+                    <p className="text-gray-300 leading-relaxed">
+                      A 6-digit OTP verification code from <strong className="text-white">no-reply@netflix.com</strong> has been sent to <strong className="text-white">{identifier}</strong>. Please check your inbox.
+                    </p>
+
+                    {previewUrl && (
+                      <a
+                        href={previewUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 mt-2 bg-emerald-500 hover:bg-emerald-600 text-black font-extrabold px-3 py-1.5 rounded-lg text-xs transition-colors"
+                      >
+                        <span>Open Webmail Inbox Preview</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-300 uppercase mb-2">Enter 6-Digit OTP</label>
+                    <input
+                      type="text"
+                      required
+                      maxLength={6}
+                      value={otpInput}
+                      onChange={(e) => setOtpInput(e.target.value)}
+                      placeholder="Enter 6-digit code"
+                      className="w-full bg-[#222222] text-center font-mono font-bold text-2xl tracking-[0.4em] text-white rounded-xl py-3 focus:outline-none focus:ring-2 focus:ring-[#E50914] border border-white/10"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting || otpInput.length < 6}
+                    className="w-full netflix-btn-red py-3 justify-center font-bold text-base shadow-lg disabled:opacity-50"
+                  >
+                    {isSubmitting ? 'Verifying...' : 'Verify OTP & Sign In'}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setOtpStep(1)}
+                    className="w-full text-xs text-gray-400 hover:text-white pt-2"
+                  >
+                    ← Change email/phone number
+                  </button>
+                </form>
+              )}
+            </>
+          )}
+
+          {/* MODE 3: FORGOT PASSWORD DIV / CONTAINER */}
+          {loginMode === 'forgot' && (
+            <div className="bg-[#181818] p-5 rounded-xl border border-white/10 shadow-inner animate-fade-in space-y-4">
+              <div className="flex items-center gap-2 text-[#E50914] text-sm font-bold border-b border-white/10 pb-3">
+                <KeyRound className="w-4 h-4" />
+                <span>Account Password Recovery</span>
+              </div>
+
+              {resetStep === 1 ? (
+                <form onSubmit={handleSendResetOtp} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-300 uppercase mb-1">
+                      Registered Email or Phone Number
+                    </label>
+                    <div className="relative">
+                      <Mail className="absolute left-3.5 top-3.5 w-4 h-4 text-gray-400" />
+                      <input
+                        type="text"
+                        required
+                        value={identifier}
+                        onChange={(e) => setIdentifier(e.target.value)}
+                        placeholder="sathiyacse1@gmail.com or mobile number"
+                        className="w-full bg-[#222222] text-white rounded-lg px-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#E50914] border border-white/10"
+                      />
+                    </div>
+                    <p className="text-[11px] text-gray-400 mt-1.5">
+                      We will verify your account in the DB and send a 6-digit OTP code from <strong className="text-gray-200">no-reply@netflix.com</strong>.
+                    </p>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full netflix-btn-red py-3 justify-center font-bold text-sm shadow-lg hover:shadow-[0_0_20px_rgba(229,9,20,0.6)]"
+                  >
+                    {isSubmitting ? 'Verifying & Sending OTP...' : 'Send Password Reset Code'}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLoginMode('password');
+                      setError('');
+                      setSuccessMsg('');
+                    }}
+                    className="w-full text-xs text-gray-400 hover:text-white pt-1 text-center"
+                  >
+                    ← Back to Sign In
+                  </button>
+                </form>
+              ) : (
+                <form onSubmit={handleResetPassword} className="space-y-4 animate-fade-in">
+                  <div className="p-3.5 bg-emerald-500/15 border border-emerald-500/40 rounded-xl text-emerald-300 text-xs space-y-1.5 shadow-md">
+                    <div className="flex items-center gap-2 font-bold text-emerald-400">
+                      <MailCheck className="w-4 h-4" />
+                      <span>Reset OTP Dispatched!</span>
+                    </div>
+                    <p className="text-gray-300 text-[11px]">
+                      A 6-digit reset code from <strong className="text-white">no-reply@netflix.com</strong> was sent to <strong className="text-white">{identifier}</strong>.
+                    </p>
+
+                    {previewUrl && (
+                      <a
+                        href={previewUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 mt-2 bg-emerald-500 hover:bg-emerald-600 text-black font-extrabold px-3 py-1.5 rounded-lg text-xs transition-colors"
+                      >
+                        <span>Open Webmail Inbox Preview</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-300 uppercase mb-1">Enter 6-Digit OTP Code</label>
+                    <input
+                      type="text"
+                      required
+                      maxLength={6}
+                      value={resetOtp}
+                      onChange={(e) => setResetOtp(e.target.value)}
+                      placeholder="6-digit code"
+                      className="w-full bg-[#222222] text-center font-mono font-bold text-xl tracking-[0.3em] text-white rounded-lg py-2.5 focus:outline-none focus:ring-2 focus:ring-[#E50914] border border-white/10"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-300 uppercase mb-1">Set New Password</label>
+                    <div className="relative">
+                      <Lock className="absolute left-3.5 top-3.5 w-4 h-4 text-gray-400" />
+                      <input
+                        type="password"
+                        required
+                        minLength={6}
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        placeholder="Minimum 6 characters"
+                        className="w-full bg-[#222222] text-white rounded-lg px-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#E50914] border border-white/10"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting || resetOtp.length < 6 || newPassword.length < 6}
+                    className="w-full netflix-btn-red py-3 justify-center font-bold text-sm shadow-lg disabled:opacity-50"
+                  >
+                    {isSubmitting ? 'Updating Password...' : 'Reset Password & Update Account'}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setResetStep(1)}
+                    className="w-full text-xs text-gray-400 hover:text-white pt-1 text-center"
+                  >
+                    ← Change Email / Phone Number
+                  </button>
+                </form>
+              )}
+            </div>
+          )}
+
+          <div className="mt-6 text-sm text-gray-400 flex items-center justify-between">
+            <span>New to Netflix DevOps?</span>
+            <button
+              onClick={() => navigate('/signup')}
+              className="text-white hover:underline font-semibold flex items-center gap-1 text-xs"
+            >
+              Sign up now <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      </main>
+
+      <footer className="relative z-20 px-6 py-4 bg-black/80 text-center text-xs text-gray-500 border-t border-white/5">
+        Netflix DevOps Practice App • Real Email Inbox Security Dispatch
+      </footer>
+    </div>
+  );
+};
