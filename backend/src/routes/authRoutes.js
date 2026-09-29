@@ -14,7 +14,7 @@ const registeredUsersMap = new Map();
 const generateToken = (id) => {
   return jwt.sign(
     { id },
-    process.env.JWT_SECRET || 'super_secret_prime_jwt_key_devops_2026',
+    process.env.JWT_SECRET || 'super_secret_netflix_jwt_key_devops_2026',
     { expiresIn: '30d' }
   );
 };
@@ -148,7 +148,7 @@ router.post('/verify-signup-otp', async (req, res) => {
 
     if (isDBConnected()) {
       const newUser = await User.create({
-        name: name || 'Prime User',
+        name: name || 'Netflix User',
         email: cleanEmail,
         phone,
         password,
@@ -271,7 +271,7 @@ router.post('/verify-login-otp', async (req, res) => {
 
     const isEmail = clean.includes('@');
     let userId = 'user_' + Date.now();
-    let name = result.userData?.name || 'Prime User';
+    let name = result.userData?.name || 'Netflix User';
 
     if (isDBConnected()) {
       const query = isEmail ? { email: clean } : { phone: clean };
@@ -366,8 +366,8 @@ router.get('/me', protect, async (req, res) => {
     }
     res.json({
       _id: req.user?._id || 'user_999',
-      name: req.user?.name || 'Prime User',
-      email: req.user?.email || 'devops@prime.com',
+      name: req.user?.name || 'Netflix User',
+      email: req.user?.email || 'devops@netflix.com',
       watchlist: [],
     });
   } catch (error) {
@@ -376,7 +376,7 @@ router.get('/me', protect, async (req, res) => {
 });
 
 // @route   POST /api/auth/send-recommendation
-// @desc    Send a movie recommendation email from no-reply@prime.com
+// @desc    Send a movie recommendation email from no-reply@netflix.com
 // @access  Public
 router.post('/send-recommendation', async (req, res) => {
   try {
@@ -388,7 +388,7 @@ router.post('/send-recommendation', async (req, res) => {
     const result = await sendRecommendationEmail(email, movieTitle, description);
     return res.json({
       success: true,
-      message: `Prime recommendation email from no-reply@prime.com sent to ${email}!`,
+      message: `Netflix recommendation email from no-reply@netflix.com sent to ${email}!`,
       previewUrl: result.previewUrl,
     });
   } catch (error) {
@@ -401,7 +401,7 @@ router.post('/send-recommendation', async (req, res) => {
 // ==========================================
 
 // @route   POST /api/auth/send-reset-otp
-// @desc    Send password reset 6-digit OTP from no-reply@prime.com
+// @desc    Send password reset 6-digit OTP from no-reply@netflix.com
 // @access  Public
 router.post('/send-reset-otp', async (req, res) => {
   try {
@@ -455,7 +455,7 @@ router.post('/send-reset-otp', async (req, res) => {
 
     return res.json({
       success: true,
-      message: `A 6-digit password reset OTP has been sent to ${targetDest} from no-reply@prime.com.`,
+      message: `A 6-digit password reset OTP has been sent to ${targetDest} from no-reply@netflix.com.`,
       emailSent: dispatchResult.emailSent,
       previewUrl: dispatchResult.previewUrl,
       identifier: clean,

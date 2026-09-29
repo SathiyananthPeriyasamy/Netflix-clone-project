@@ -42,7 +42,7 @@ export const MovieModal = ({ movie, onClose, watchlist = [], onToggleWatchlist }
               <div className="absolute bottom-6 left-6 flex items-center gap-3 z-10">
                 <button
                   onClick={() => setIsPlaying(true)}
-                  className="prime-btn-red shadow-lg"
+                  className="netflix-btn-red shadow-lg"
                 >
                   <Play className="w-5 h-5 fill-current" />
                   <span>Play Stream</span>
@@ -50,7 +50,7 @@ export const MovieModal = ({ movie, onClose, watchlist = [], onToggleWatchlist }
 
                 <button
                   onClick={() => onToggleWatchlist(movie._id)}
-                  className="prime-btn-gray"
+                  className="netflix-btn-gray"
                 >
                   {inWatchlist ? <Check className="w-5 h-5 text-emerald-400" /> : <Plus className="w-5 h-5" />}
                   <span>{inWatchlist ? 'In My List' : 'Add to My List'}</span>

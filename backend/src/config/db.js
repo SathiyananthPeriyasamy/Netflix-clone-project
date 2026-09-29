@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 export const connectDB = async () => {
   try {
-    const connStr = process.env.MONGO_URI || 'mongodb://localhost:27017/prime_db';
+    const connStr = process.env.MONGO_URI || 'mongodb://localhost:27017/netflix_db';
     console.log(`[Database] Attempting connection to MongoDB at: ${connStr}`);
     
     // Set short buffer timeout so API fails fast if MongoDB is not active

@@ -10,13 +10,13 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const initAuth = async () => {
-      const storedUser = localStorage.getItem('prime_user');
+      const storedUser = localStorage.getItem('netflix_user');
 
       if (storedUser) {
         try {
           setUser(JSON.parse(storedUser));
         } catch (e) {
-          localStorage.removeItem('prime_user');
+          localStorage.removeItem('netflix_user');
         }
       }
 
@@ -53,8 +53,8 @@ export const AuthProvider = ({ children }) => {
         return { success: false, error: data.message || 'Account does not exist or password incorrect.' };
       }
 
-      localStorage.setItem('prime_token', data.token);
-      localStorage.setItem('prime_user', JSON.stringify(data));
+      localStorage.setItem('netflix_token', data.token);
+      localStorage.setItem('netflix_user', JSON.stringify(data));
       setUser(data);
       return { success: true };
     } catch (error) {
@@ -103,8 +103,8 @@ export const AuthProvider = ({ children }) => {
         return { success: false, error: data.message || 'OTP verification failed' };
       }
 
-      localStorage.setItem('prime_token', data.token);
-      localStorage.setItem('prime_user', JSON.stringify(data));
+      localStorage.setItem('netflix_token', data.token);
+      localStorage.setItem('netflix_user', JSON.stringify(data));
       setUser(data);
       return { success: true };
     } catch (error) {
@@ -153,8 +153,8 @@ export const AuthProvider = ({ children }) => {
         return { success: false, error: data.message || 'OTP verification failed' };
       }
 
-      localStorage.setItem('prime_token', data.token);
-      localStorage.setItem('prime_user', JSON.stringify(data));
+      localStorage.setItem('netflix_token', data.token);
+      localStorage.setItem('netflix_user', JSON.stringify(data));
       setUser(data);
       return { success: true };
     } catch (error) {
@@ -216,15 +216,15 @@ export const AuthProvider = ({ children }) => {
     } catch (e) {
       console.warn('Reset DB request sent');
     }
-    localStorage.removeItem('prime_token');
-    localStorage.removeItem('prime_user');
+    localStorage.removeItem('netflix_token');
+    localStorage.removeItem('netflix_user');
     setUser(null);
     window.location.reload();
   };
 
   const logout = () => {
-    localStorage.removeItem('prime_token');
-    localStorage.removeItem('prime_user');
+    localStorage.removeItem('netflix_token');
+    localStorage.removeItem('netflix_user');
     setUser(null);
   };
 

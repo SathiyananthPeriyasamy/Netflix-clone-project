@@ -1,4 +1,4 @@
-name: Prime DevOps CI/CD Deployment
+name: Netflix DevOps CI/CD Deployment
 
 on:
   push:
@@ -28,7 +28,7 @@ jobs:
           context: ./backend
           file: ./backend/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/prime-backend:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/netflix-backend:latest
 
       # Step 4: Build & Push Frontend Docker Image
       - name: Build and Push Frontend Image
@@ -37,7 +37,7 @@ jobs:
           context: ./frontend
           file: ./frontend/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/prime-frontend:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/netflix-frontend:latest
 
       # Step 5: SSH into AWS EC2 and deploy updated application
       - name: SSH Deploy to AWS EC2

@@ -1,12 +1,12 @@
-# 🎬 Prime Full-Stack Application for DevOps Practice
+# 🎬 Netflix Full-Stack Application for DevOps Practice
 
-A complete, production-ready full-stack Prime Clone application designed specifically for **DevOps Practice** (Local Execution & Containerization using Docker & Docker Compose).
+A complete, production-ready full-stack Netflix Clone application designed specifically for **DevOps Practice** (Local Execution & Containerization using Docker & Docker Compose).
 
 ---
 
 ## 🛠️ Application Architecture
 
-- **Frontend:** React 18, Vite, Tailwind-like custom Prime CSS design system (Hero banner, Movie Rows, Video Modal, Auth pages).
+- **Frontend:** React 18, Vite, Tailwind-like custom Netflix CSS design system (Hero banner, Movie Rows, Video Modal, Auth pages).
 - **Backend:** Node.js, Express.js REST API, JWT Authentication, bcrypt password hashing, health check endpoint (`/api/health`), and automated database seed script.
 - **Database:** MongoDB persistence for Users, Movies, and Watchlist.
 - **DevOps & Web Server:** Docker multi-stage builds, Nginx reverse proxying `/api` requests, Docker Compose container orchestration.
@@ -54,7 +54,7 @@ npm run dev
 > Frontend Application will start at: `http://localhost:3000`
 
 ### 🔑 Demo Login Credentials
-- **Email:** `devops@prime.com`
+- **Email:** `devops@netflix.com`
 - **Password:** `devops123`
 *(Or click the **"Use DevOps Quick Demo Credentials"** button on the Login page)*
 
@@ -65,7 +65,7 @@ npm run dev
 Containerize the entire stack (MongoDB + Express Backend + Nginx React Frontend) with a single command!
 
 ### 1. Build and Launch Containers
-From the root directory (`prime-clone-devops`):
+From the root directory (`netflix-clone-devops`):
 ```bash
 docker compose up --build -d
 ```
@@ -75,9 +75,9 @@ docker compose up --build -d
 docker compose ps
 ```
 You should see 3 running containers:
-1. `prime-mongodb` (Port 27017)
-2. `prime-backend` (Port 5000)
-3. `prime-frontend` (Port 80 & 3000)
+1. `netflix-mongodb` (Port 27017)
+2. `netflix-backend` (Port 5000)
+3. `netflix-frontend` (Port 80 & 3000)
 
 ### 3. Access the Application
 - Open your browser to: `http://localhost` or `http://localhost:3000`
@@ -85,7 +85,7 @@ You should see 3 running containers:
 
 ### 4. Seed MongoDB Inside Container Stack
 ```bash
-docker exec -it prime-backend npm run seed
+docker exec -it netflix-backend npm run seed
 ```
 
 ---
@@ -113,7 +113,7 @@ docker compose down -v
 
 ### Inspect Container Health
 ```bash
-docker inspect --format='{{json .State.Health}}' prime-backend
+docker inspect --format='{{json .State.Health}}' netflix-backend
 ```
 
 ---
@@ -121,7 +121,7 @@ docker inspect --format='{{json .State.Health}}' prime-backend
 ## 📁 Project Structure
 
 ```
-prime-clone-devops/
+netflix-clone-devops/
 ├── backend/
 │   ├── src/
 │   │   ├── config/db.js           # Mongoose MongoDB connection
@@ -143,7 +143,7 @@ prime-clone-devops/
 │   │   ├── context/AuthContext.jsx# Auth token state & health status
 │   │   ├── App.jsx
 │   │   ├── main.jsx
-│   │   └── index.css              # Prime UI Design System
+│   │   └── index.css              # Netflix UI Design System
 │   ├── nginx.conf                 # Nginx web server & reverse proxy
 │   ├── package.json
 │   ├── vite.config.js

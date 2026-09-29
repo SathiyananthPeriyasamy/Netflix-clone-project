@@ -12,7 +12,7 @@ const MainApp = () => {
     return (
       <div className="min-h-screen bg-[#141414] flex flex-col items-center justify-center text-white">
         <div className="w-12 h-12 border-4 border-[#E50914] border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-sm font-semibold tracking-wider text-gray-400">Loading Prime DevOps...</p>
+        <p className="text-sm font-semibold tracking-wider text-gray-400">Loading Netflix DevOps...</p>
       </div>
     );
   }

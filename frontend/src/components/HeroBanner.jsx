@@ -52,7 +52,7 @@ export const HeroBanner = ({ movie, onSelectMovie }) => {
         <div className="flex items-center gap-4">
           <button
             onClick={() => onSelectMovie(movie)}
-            className="prime-btn-red hover:shadow-[0_0_20px_rgba(229,9,20,0.6)]"
+            className="netflix-btn-red hover:shadow-[0_0_20px_rgba(229,9,20,0.6)]"
           >
             <Play className="w-5 h-5 fill-current" />
             <span>Play Trailer</span>
@@ -60,7 +60,7 @@ export const HeroBanner = ({ movie, onSelectMovie }) => {
 
           <button
             onClick={() => onSelectMovie(movie)}
-            className="prime-btn-gray"
+            className="netflix-btn-gray"
           >
             <Info className="w-5 h-5" />
             <span>More Info</span>

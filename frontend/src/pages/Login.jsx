@@ -154,7 +154,7 @@ export const Login = () => {
       {/* Header */}
       <header className="relative z-20 px-6 md:px-12 py-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-[#E50914] font-black text-3xl tracking-tighter">PRIME</span>
+          <span className="text-[#E50914] font-black text-3xl tracking-tighter">NETFLIX</span>
         </div>
       </header>
 
@@ -175,7 +175,7 @@ export const Login = () => {
 
           <p className="text-gray-400 text-xs mb-6">
             {loginMode === 'forgot'
-              ? 'Verification OTP will be sent from no-reply@prime.com'
+              ? 'Verification OTP will be sent from no-reply@netflix.com'
               : 'Choose your preferred authentication method.'}
           </p>
 
@@ -281,7 +281,7 @@ export const Login = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full prime-btn-red py-3 justify-center font-bold text-base mt-2 shadow-lg hover:shadow-[0_0_20px_rgba(229,9,20,0.6)]"
+                className="w-full netflix-btn-red py-3 justify-center font-bold text-base mt-2 shadow-lg hover:shadow-[0_0_20px_rgba(229,9,20,0.6)]"
               >
                 {isSubmitting ? 'Authenticating...' : 'Sign In with Password'}
               </button>
@@ -311,7 +311,7 @@ export const Login = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full prime-btn-red py-3 justify-center font-bold text-base mt-2 shadow-lg hover:shadow-[0_0_20px_rgba(229,9,20,0.6)]"
+                    className="w-full netflix-btn-red py-3 justify-center font-bold text-base mt-2 shadow-lg hover:shadow-[0_0_20px_rgba(229,9,20,0.6)]"
                   >
                     {isSubmitting ? 'Sending OTP...' : 'Send OTP to Email / Phone'}
                   </button>
@@ -324,7 +324,7 @@ export const Login = () => {
                       <span>OTP Sent Successfully!</span>
                     </div>
                     <p className="text-gray-300 leading-relaxed">
-                      A 6-digit OTP verification code from <strong className="text-white">no-reply@prime.com</strong> has been sent to <strong className="text-white">{identifier}</strong>. Please check your inbox.
+                      A 6-digit OTP verification code from <strong className="text-white">no-reply@netflix.com</strong> has been sent to <strong className="text-white">{identifier}</strong>. Please check your inbox.
                     </p>
 
                     {previewUrl && (
@@ -356,7 +356,7 @@ export const Login = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting || otpInput.length < 6}
-                    className="w-full prime-btn-red py-3 justify-center font-bold text-base shadow-lg disabled:opacity-50"
+                    className="w-full netflix-btn-red py-3 justify-center font-bold text-base shadow-lg disabled:opacity-50"
                   >
                     {isSubmitting ? 'Verifying...' : 'Verify OTP & Sign In'}
                   </button>
@@ -399,14 +399,14 @@ export const Login = () => {
                       />
                     </div>
                     <p className="text-[11px] text-gray-400 mt-1.5">
-                      We will verify your account in the DB and send a 6-digit OTP code from <strong className="text-gray-200">no-reply@prime.com</strong>.
+                      We will verify your account in the DB and send a 6-digit OTP code from <strong className="text-gray-200">no-reply@netflix.com</strong>.
                     </p>
                   </div>
 
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full prime-btn-red py-3 justify-center font-bold text-sm shadow-lg hover:shadow-[0_0_20px_rgba(229,9,20,0.6)]"
+                    className="w-full netflix-btn-red py-3 justify-center font-bold text-sm shadow-lg hover:shadow-[0_0_20px_rgba(229,9,20,0.6)]"
                   >
                     {isSubmitting ? 'Verifying & Sending OTP...' : 'Send Password Reset Code'}
                   </button>
@@ -431,7 +431,7 @@ export const Login = () => {
                       <span>Reset OTP Dispatched!</span>
                     </div>
                     <p className="text-gray-300 text-[11px]">
-                      A 6-digit reset code from <strong className="text-white">no-reply@prime.com</strong> was sent to <strong className="text-white">{identifier}</strong>.
+                      A 6-digit reset code from <strong className="text-white">no-reply@netflix.com</strong> was sent to <strong className="text-white">{identifier}</strong>.
                     </p>
 
                     {previewUrl && (
@@ -479,7 +479,7 @@ export const Login = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting || resetOtp.length < 6 || newPassword.length < 6}
-                    className="w-full prime-btn-red py-3 justify-center font-bold text-sm shadow-lg disabled:opacity-50"
+                    className="w-full netflix-btn-red py-3 justify-center font-bold text-sm shadow-lg disabled:opacity-50"
                   >
                     {isSubmitting ? 'Updating Password...' : 'Reset Password & Update Account'}
                   </button>
@@ -497,7 +497,7 @@ export const Login = () => {
           )}
 
           <div className="mt-6 text-sm text-gray-400 flex items-center justify-between">
-            <span>New to Prime?</span>
+            <span>New to Netflix?</span>
             <button
               onClick={() => navigate('/signup')}
               className="text-white hover:underline font-semibold flex items-center gap-1 text-xs"
@@ -509,7 +509,7 @@ export const Login = () => {
       </main>
 
       <footer className="relative z-20 px-6 py-4 bg-black/80 text-center text-xs text-gray-500 border-t border-white/5">
-        © 2026 Prime Clone. All rights reserved.
+        © 2026 Netflix Clone. All rights reserved.
       </footer>
     </div>
   );

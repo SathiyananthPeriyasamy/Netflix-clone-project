@@ -27,14 +27,14 @@ export const Navbar = ({ onSearch, activeCategory, setActiveCategory }) => {
           : 'bg-gradient-to-b from-black/80 via-black/40 to-transparent'
       }`}
     >
-      {/* Left section: Prime Brand & Navigation Links */}
+      {/* Left section: Netflix Brand & Navigation Links */}
       <div className="flex items-center gap-8">
         <div 
           className="flex items-center gap-2 cursor-pointer group"
           onClick={() => setActiveCategory('All')}
         >
           <span className="text-[#E50914] font-extrabold text-2xl md:text-3xl tracking-tighter drop-shadow-md group-hover:scale-105 transition-transform">
-            PRIME
+            NETFLIX
           </span>
         </div>
 
@@ -70,9 +70,9 @@ export const Navbar = ({ onSearch, activeCategory, setActiveCategory }) => {
 
           {/* Profile Dropdown Menu */}
           {showProfileMenu && (
-            <div className="absolute right-0 mt-2 w-56 prime-glass rounded-lg shadow-2xl p-3 border border-white/15 text-sm animate-fade-in z-50">
+            <div className="absolute right-0 mt-2 w-56 netflix-glass rounded-lg shadow-2xl p-3 border border-white/15 text-sm animate-fade-in z-50">
               <div className="pb-3 mb-2 border-b border-white/10">
-                <p className="font-semibold text-white">{user?.name || 'Prime User'}</p>
+                <p className="font-semibold text-white">{user?.name || 'Netflix User'}</p>
                 <p className="text-xs text-gray-400 truncate">{user?.email || 'user@example.com'}</p>
               </div>
 
@@ -86,7 +86,7 @@ export const Navbar = ({ onSearch, activeCategory, setActiveCategory }) => {
                   className="flex items-center gap-2 w-full px-2 py-2 text-red-400 hover:bg-red-500/10 rounded transition-colors text-left font-medium mt-1"
                 >
                   <LogOut className="w-4 h-4" />
-                  Sign Out of Prime
+                  Sign Out of Netflix
                 </button>
               </div>
             </div>

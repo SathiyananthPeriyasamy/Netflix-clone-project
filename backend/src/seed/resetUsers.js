@@ -6,7 +6,7 @@ dotenv.config();
 
 export const resetAllUsers = async () => {
   try {
-    const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/prime_db';
+    const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/netflix_db';
     console.log(`[Reset Script] Connecting to MongoDB at: ${mongoUri}`);
     await mongoose.connect(mongoUri);
 

@@ -122,22 +122,22 @@ const sampleMovies = [
 
 export const seedDatabase = async () => {
   try {
-    const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/prime_db';
+    const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/netflix_db';
     console.log(`[Seed Script] Connecting to MongoDB: ${mongoUri}...`);
     await mongoose.connect(mongoUri);
 
     console.log('[Seed Script] Clearing existing movie catalog...');
     await Movie.deleteMany({});
 
-    console.log('[Seed Script] Inserting rich sample Prime movie catalog...');
+    console.log('[Seed Script] Inserting rich sample Netflix movie catalog...');
     await Movie.insertMany(sampleMovies);
 
-    console.log('[Seed Script] Seeding demo Prime user account (devops@prime.com / devops123)...');
-    const existingDevUser = await User.findOne({ email: 'devops@prime.com' });
+    console.log('[Seed Script] Seeding demo Netflix user account (devops@netflix.com / devops123)...');
+    const existingDevUser = await User.findOne({ email: 'devops@netflix.com' });
     if (!existingDevUser) {
       await User.create({
         name: 'DevOps Engineer',
-        email: 'devops@prime.com',
+        email: 'devops@netflix.com',
         password: 'devops123',
       });
     }
