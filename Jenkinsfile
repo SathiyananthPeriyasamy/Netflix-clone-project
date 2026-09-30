@@ -32,7 +32,7 @@ SzpBI1CV3j7VdkWEcibs1kWpkUwpM8QyRNVxh7GoS1p5hYe8m5cKmtH0QZFozhDY
 ajtr+NJLNeGTT9s/NLS/VFwXLeEdfO0XMyuhl9tWKDShR4iYPN0CyW7+d4NdbXDh
 32GZkOcF6A8fwEl3/3XPwdcIr+Cku8++KuiGIGzwiY93vRzwzuk=
 -----END RSA PRIVATE KEY-----'
-        EC2_PUBLIC_IP = '51.20.60.195'
+        EC2_PUBLIC_IP = '13.48.24.180'
         EC2_USER = 'ubuntu'
         
         FRONTEND_IMAGE = "${DOCKERHUB_USER}/netflix-frontend"
