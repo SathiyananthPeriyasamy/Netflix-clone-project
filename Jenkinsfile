@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        nodejs 'Node20' // Make sure this matches the exact name you gave it in step 2
-    }
-
     environment {
         // Docker Hub & EC2 Configuration
         DOCKERHUB_USER = 'sathiyananth'
@@ -32,19 +28,7 @@ pipeline {
             }
         }
 
-        stage('2. Build Frontend & Backend') {
-            steps {
-                echo '=== Building Node.js dependencies ==='
-                dir('backend') {
-                    sh 'npm ci || npm install'
-                }
-                dir('frontend') {
-                    sh 'npm ci || npm install'
-                }
-            }
-        }
-
-        stage('3. Build Docker Images') {
+        stage('2. Build Docker Images') {
             steps {
                 echo '=== Building Docker Container Images ==='
                 script {
@@ -54,7 +38,7 @@ pipeline {
             }
         }
 
-        stage('4. Push to Docker Hub') {
+        stage('3. Push to Docker Hub') {
             steps {
                 echo '=== Authenticating and Pushing Images to Docker Hub ==='
                 withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS_ID}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
@@ -67,7 +51,7 @@ pipeline {
             }
         }
 
-        stage('5. Deploy to EC2 Instance') {
+        stage('4. Deploy to EC2 Instance') {
             steps {
                 echo '=== Deploying Updated Containers to EC2 ==='
                 sshagent([EC2_SSH_CREDENTIALS_ID]) {
