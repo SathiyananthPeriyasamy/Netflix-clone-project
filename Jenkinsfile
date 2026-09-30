@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        // Docker Hub & EC2 Configuration
+        // Docker Hub & EC2 Configuratio
         DOCKERHUB_USER = 'sathiyananth'
         DOCKERHUB_CREDENTIALS_ID = 'dockerhub_cred'
         EC2_SSH_CREDENTIALS_ID = 'ec2-ssh-key'
