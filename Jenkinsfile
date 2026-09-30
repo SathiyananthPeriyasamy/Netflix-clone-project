@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools {
+        nodejs 'Node20' // Make sure this matches the exact name you gave it in step 2
+    }
+
     environment {
         // Docker Hub & EC2 Configuration
         DOCKERHUB_USER = 'sathiyananth'
