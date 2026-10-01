@@ -34,7 +34,7 @@ pipeline {
         stage('2. SonarQube Code Quality & Quality Gate') {
             steps {
                 echo '=== Running SonarQube Scan & Checking Quality Gate ==='
-                withCredentials([string(credentialsId: "${SONAR_TOKEN_CREDENTIALS_ID}", variable: 'SONARQUBE_TOCKEN')]) {
+                withCredentials([string(credentialsId: "${SONAR_TOKEN_CREDENTIALS_ID}", variable: 'SONAR_TOKEN')]) {
                     sh """
                         docker run --rm \
                             --network host \
@@ -43,7 +43,7 @@ pipeline {
                             -Dsonar.projectKey=netflix-clone \
                             -Dsonar.sources=. \
                             -Dsonar.host.url=${SONAR_URL} \
-                            -Dsonar.login=\${SONARQUBE_TOCKEN}
+                            -Dsonar.login=\${SONAR_TOKEN}
                     """
                 }
             }
