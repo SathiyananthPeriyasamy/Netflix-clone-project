@@ -10,7 +10,7 @@ pipeline {
         EC2_USER = 'ubuntu'
         
         SONAR_URL = 'http://13.50.101.1:9000'
-        SONAR_TOKEN_CREDENTIALS_ID = 'sonarqube-tocken'
+        SONAR_TOKEN_CREDENTIALS_ID = 'Sonarqube-tocken'
         
         FRONTEND_IMAGE = "${DOCKERHUB_USER}/netflix-frontend"
         BACKEND_IMAGE = "${DOCKERHUB_USER}/netflix-backend"
@@ -34,7 +34,7 @@ pipeline {
         stage('2. SonarQube Code Quality & Quality Gate') {
             steps {
                 echo '=== Running SonarQube Scan & Checking Quality Gate ==='
-                withCredentials([string(credentialsId: "${SONAR_TOKEN_CREDENTIALS_ID}", variable: 'SONAR_TOKEN')]) {
+                withCredentials([string(credentialsId: "${SONAR_TOKEN_CREDENTIALS_ID}", variable: 'Sonar-token')]) {
                     sh """
                         docker run --rm \
                             --network host \
@@ -43,7 +43,7 @@ pipeline {
                             -Dsonar.projectKey=netflix-clone \
                             -Dsonar.sources=. \
                             -Dsonar.host.url=${SONAR_URL} \
-                            -Dsonar.login=\${SONAR_TOKEN}
+                            -Dsonar.login=\${Sonar-token}
                     """
                 }
             }
