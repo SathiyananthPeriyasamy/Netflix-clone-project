@@ -1,6 +1,6 @@
-# 🎬 Netflix Full-Stack Application & Dual CI/CD DevOps Pipeline
+# 🎬 Netflix Full-Stack Application & DevSecOps CI/CD Pipeline
 
-A production-grade, full-stack **Netflix Clone** built for **DevOps Engineering & Cloud Architecture Practice**. This repository features multi-stage Docker containerization, AWS EC2 Cloud Deployment, and a **Dual CI/CD Pipeline Architecture** running **Jenkins** (with Webhooks) and **GitHub Actions** in parallel.
+A production-grade, full-stack **Netflix Clone** built for **DevOps, DevSecOps Engineering & Cloud Architecture Practice**. This project features multi-stage Docker containerization, AWS EC2 Cloud Deployment, SonarQube SAST Code Quality Gates, Live Smoke Testing, and a **Dual CI/CD Pipeline Architecture** running **Jenkins** (with GitHub Webhooks) and **GitHub Actions** in parallel.
 
 ---
 
@@ -8,13 +8,16 @@ A production-grade, full-stack **Netflix Clone** built for **DevOps Engineering 
 
 ```mermaid
 flowchart TD
-    subgraph Developer Workspace & SCM
-        Dev[Developer] -->|git push origin master| GH[GitHub Repository]
+    subgraph Developer Workspace & Private SCM
+        Dev[Developer] -->|git push origin master| GH[Private GitHub Repository]
     end
 
-    subgraph Dual CI/CD Pipelines
+    subgraph DevSecOps Dual CI/CD Pipelines
         GH -->|Push Event / Webhook| GHA[GitHub Actions Runner]
         GH -->|Push Event / Webhook 8091| Jenkins[Jenkins CI/CD Server]
+
+        Jenkins -->|1. Scan Code| Sonar[SonarQube Server :9000]
+        Sonar -->|2. Quality Gate PASS| Jenkins
         
         GHA -->|Build & Push Images| DH[Docker Hub Registry]
         Jenkins -->|Build & Push Images| DH
@@ -22,8 +25,8 @@ flowchart TD
 
     subgraph AWS EC2 Cloud Infrastructure
         DH -->|docker compose pull| EC2[AWS EC2 Instance]
-        Jenkins -->|SSH Automated Deploy| EC2
-        GHA -->|SSH Automated Deploy| EC2
+        Jenkins -->|3. SSH Deploy & Prune| EC2
+        GHA -->|SSH Deploy| EC2
 
         subgraph Docker Compose Container Stack
             Nginx[Nginx Reverse Proxy :80] --> React[React 18 Frontend UI]
@@ -31,6 +34,8 @@ flowchart TD
             Express --> Mongo[(MongoDB Database :27017)]
             Express --> OTP[SMS / Webmail OTP Engine]
         end
+
+        Jenkins -->|4. Live Smoke Test| Nginx
     end
 
     User[End User Browser] -->|HTTP :80| Nginx
@@ -51,26 +56,28 @@ flowchart TD
 * **OTP Engine:** Dynamic SMS dispatch (Fast2SMS / Twilio) with fallback to virtual webmail preview.
 * **Database:** MongoDB persistence for Users, Movies, and Watchlists.
 
-### **DevOps & Cloud Infrastructure**
+### **DevOps, DevSecOps & Cloud Infrastructure**
 * **Containerization:** Multi-stage `Dockerfile` builds for optimized lightweight images (`node:18-alpine`, `nginx:alpine`).
+* **Code Security & Quality (SAST):** SonarQube Server & SonarScanner CLI with Quality Gate verification.
 * **Orchestration:** `docker-compose.yml` coordinating MongoDB, Express Backend, and Nginx Frontend.
 * **Cloud Hosting:** AWS EC2 Instance (Amazon Linux 2023 / Ubuntu Server).
 
 ---
 
-## 🔄 Dual CI/CD Pipeline Setup
+## 🔄 Dual CI/CD Pipeline & DevSecOps Stages
 
-This project features **two independent CI/CD pipelines** working simultaneously:
+### 1. 🔴 Jenkins Pipeline (`Jenkinsfile`)
+Executes 6 automated stages on every `git push`:
+1. **Checkout Code**: Securely authenticates with private GitHub repositories using GitHub PAT (`github-tocken`).
+2. **SonarQube Code Quality & Quality Gate**: Scans JavaScript/React source code for bugs, code smells, and security vulnerabilities via SonarQube Server (`http://<EC2-IP>:9000`).
+3. **Build Docker Images**: Builds frontend & backend images with `--no-cache` to ensure clean builds.
+4. **Push to Docker Hub**: Authenticates and pushes tagged images to Docker Hub (`sathiyananth/netflix-frontend`, `sathiyananth/netflix-backend`).
+5. **Deploy to EC2 Instance**: SSHs into EC2, purges old container cache, pulls fresh images, and restarts the stack (`docker compose up -d --force-recreate`).
+6. **Live Application Smoke Test**: Automatically executes HTTP curl health checks on `http://<EC2-IP>/` (Frontend 200 OK) and `http://<EC2-IP>/api/health` (Express API Health Endpoint) before passing the build.
 
-### 1. 🤖 GitHub Actions Pipeline (`.github/workflows/deploy.yml`)
-* Triggers automatically on `git push origin master`.
-* Logins to Docker Hub, builds multi-stage images, and pushes tags (`latest` & build numbers).
-* Executes secure SSH deployment to AWS EC2 using `appleboy/ssh-action@v1.0.3`.
-
-### 2. 🔴 Jenkins Pipeline (`Jenkinsfile`)
-* Declarative Jenkins Pipeline executing inside a Dockerized Jenkins instance.
-* Integrated with **GitHub Webhooks** (`http://<EC2-IP>:8091/github-webhook/`) for instant triggering on git push.
-* Manages credential security via Jenkins Credential Store (`dockerhub_cred` and `ec2-ssh-key`).
+### 2. 🤖 GitHub Actions Pipeline (`.github/workflows/deploy.yml`)
+* Runs in parallel on GitHub cloud runners.
+* Logins to Docker Hub, builds multi-stage images, pushes `latest` tags, and deploys via SSH action.
 
 ---
 
@@ -114,9 +121,9 @@ docker compose up --build -d
 
 ---
 
-## 🌐 AWS EC2 Cloud Deployment Guide
+## 🌐 AWS EC2 Cloud Deployment & Firewall Rules
 
-### Prerequisites & Security Group Rules
+### Security Group Inbound Rules
 
 Ensure your AWS EC2 Instance Security Group has the following **Inbound Rules**:
 
@@ -126,20 +133,7 @@ Ensure your AWS EC2 Instance Security Group has the following **Inbound Rules**:
 | **SSH** | TCP | `22` | `0.0.0.0/0` | Remote Terminal & CI/CD Deployment |
 | **Custom TCP** | TCP | `5000` | `0.0.0.0/0` | Express REST API |
 | **Custom TCP** | TCP | `8091` | `0.0.0.0/0` | Jenkins Dashboard & Webhook Endpoint |
-
-### Deploying via Docker Compose on EC2
-
-```bash
-# SSH into EC2
-ssh -i your-key.pem ubuntu@<EC2-PUBLIC-IP>
-
-# Clone repository
-git clone https://github.com/SathiyananthPeriyasamy/Netflix-clone-project.git
-cd Netflix-clone-project
-
-# Launch stack
-sudo docker compose up -d --build
-```
+| **Custom TCP** | TCP | `9000` | `0.0.0.0/0` | SonarQube Dashboard & Scanner |
 
 ---
 
@@ -163,8 +157,8 @@ Netflix-clone-project/
 │   ├── Dockerfile              # Multi-Stage Dockerfile (Build React -> Serve Nginx)
 │   └── package.json
 ├── docker-compose.yml          # Container Orchestration Specification
-├── Jenkinsfile                 # Declarative Jenkins CI/CD Pipeline Script
-└── README.md                   # Project Documentation
+├── Jenkinsfile                 # Declarative Jenkins DevSecOps Pipeline Script
+└── README.md                   # Complete Project Documentation
 ```
 
 ---
@@ -181,11 +175,17 @@ sudo docker compose logs -f backend
 # Fix Docker permission issue inside Jenkins container
 sudo docker exec -u 0 jenkins chmod 666 /var/run/docker.sock
 
-# Restart container stack
-sudo docker compose down && sudo docker compose up -d
+# Clean Docker build cache and unused containers
+sudo docker system prune -af --volumes
+
+# Restart Jenkins Container
+sudo docker run -d --name jenkins --restart always -p 8091:8080 -p 50000:50000 -v jenkins_data:/var/jenkins_home -v /var/run/docker.sock:/var/run/docker.sock jenkins/jenkins:lts
+
+# Restart SonarQube Container
+sudo docker run -d --name sonarqube --restart always -p 9000:9000 sonarqube:lts-community
 ```
 
 ---
 
 ## 📄 License & Credits
-Built for educational, portfolio, and DevOps practice purposes. All movie metadata powered by TMDB standards.
+Built for educational, portfolio, and DevSecOps practice purposes. All movie metadata powered by TMDB standards.
