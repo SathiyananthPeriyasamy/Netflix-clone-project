@@ -6,7 +6,7 @@ pipeline {
         DOCKERHUB_USER = 'sathiyananth'
         DOCKERHUB_CREDENTIALS_ID = 'dockerhub_cred'
         EC2_SSH_CREDENTIALS_ID = 'ec2-ssh-key'
-        EC2_PUBLIC_IP = '13.50.110.118'
+        EC2_PUBLIC_IP = '13.50.101.1'
         EC2_USER = 'ubuntu'
         
         FRONTEND_IMAGE = "${DOCKERHUB_USER}/netflix-frontend"
