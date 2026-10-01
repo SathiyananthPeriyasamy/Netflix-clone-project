@@ -54,8 +54,8 @@ pipeline {
             steps {
                 echo '=== Building Docker Container Images ==='
                 script {
-                    sh "docker build -t ${FRONTEND_IMAGE}:${BUILD_TAG} -t ${FRONTEND_IMAGE}:latest ./frontend"
-                    sh "docker build -t ${BACKEND_IMAGE}:${BUILD_TAG} -t ${BACKEND_IMAGE}:latest ./backend"
+                    sh "docker build --no-cache -t ${FRONTEND_IMAGE}:${BUILD_TAG} -t ${FRONTEND_IMAGE}:latest ./frontend"
+                    sh "docker build --no-cache -t ${BACKEND_IMAGE}:${BUILD_TAG} -t ${BACKEND_IMAGE}:latest ./backend"
                 }
             }
         }
@@ -81,9 +81,10 @@ pipeline {
                         ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_PUBLIC_IP} '
                             cd ~/Netflix-clone-project && \
                             git pull origin master && \
-                            sudo docker compose down && \
+                            sudo docker compose down --rmi all --volumes --remove-orphans && \
+                            sudo docker system prune -af && \
                             sudo docker compose pull || true && \
-                            sudo docker compose up -d --build
+                            sudo docker compose up -d --force-recreate
                         '
                     """
                 }
@@ -112,6 +113,7 @@ pipeline {
     post {
         always {
             echo '=== Cleaning up workspace ==='
+            sh 'docker system prune -af || true'
             cleanWs()
         }
         success {
