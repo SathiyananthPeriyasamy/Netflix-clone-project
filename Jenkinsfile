@@ -10,7 +10,7 @@ pipeline {
         EC2_USER = 'ubuntu'
         
         SONAR_URL = 'http://13.50.101.1:9000'
-        SONAR_TOKEN_CREDENTIALS_ID = 'Sonarqube-tocken'
+        SONAR_TOKEN_CREDENTIALS_ID = 'Sonarqube-token'
         
         FRONTEND_IMAGE = "${DOCKERHUB_USER}/netflix-frontend"
         BACKEND_IMAGE = "${DOCKERHUB_USER}/netflix-backend"
