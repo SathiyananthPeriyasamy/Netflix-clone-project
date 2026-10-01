@@ -4,7 +4,7 @@ pipeline {
     environment {
         // Docker Hub & EC2 Configuratio
         DOCKERHUB_USER = 'sathiyananth'
-        DOCKERHUB_CREDENTIALS_ID = 'dockerhub_cred'
+        DOCKERHUB_CREDENTIALS_ID = 'Dockerhub_Cred'
         EC2_SSH_CREDENTIALS_ID = 'ec2-ssh-key'
         EC2_PUBLIC_IP = '13.50.101.1'
         EC2_USER = 'ubuntu'
