@@ -94,14 +94,14 @@ pipeline {
             steps {
                 echo '=== Verifying Live Application Status on EC2 ==='
                 sh '''
-                    echo "Waiting 5 seconds for containers to initialize..."
-                    sleep 5
+                    echo "Waiting 12 seconds for MongoDB & Express containers to initialize..."
+                    sleep 12
 
                     echo "1. Checking Frontend Web UI Status (HTTP 200)..."
                     curl -s -o /dev/null -w "%{http_code}" http://${EC2_PUBLIC_IP}/ | grep -E "200|301|302" || exit 1
 
-                    echo "2. Checking Backend REST API Health Endpoint..."
-                    curl -s -f http://${EC2_PUBLIC_IP}:5000/api/health || exit 1
+                    echo "2. Checking Backend REST API Health Endpoint via Nginx..."
+                    curl -s -f http://${EC2_PUBLIC_IP}/api/health || exit 1
 
                     echo "=== ✅ SMOKE TEST PASSED: Application is live & healthy! ==="
                 '''
