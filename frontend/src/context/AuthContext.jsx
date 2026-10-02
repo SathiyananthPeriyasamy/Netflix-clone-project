@@ -2,21 +2,58 @@ import React, { createContext, useState, useEffect } from 'react';
 
 export const AuthContext = createContext();
 
+const DEFAULT_PROFILES = [
+  { id: 'p1', name: 'sathiya', avatarColor: 'bg-sky-500', isKids: false, avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop' },
+  { id: 'p2', name: 'Gokul', avatarColor: 'bg-[#E50914]', isKids: false, avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop' },
+  { id: 'p3', name: 'Yash', avatarColor: 'bg-amber-400', isKids: false, avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop' },
+  { id: 'p4', name: 'Kids', avatarColor: 'bg-gradient-to-tr from-pink-500 via-purple-500 to-indigo-500', isKids: true },
+];
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [watchlist, setWatchlist] = useState([]);
+  const [likedMovies, setLikedMovies] = useState([]);
   const [apiHealth, setApiHealth] = useState(null);
+
+  // Dynamic Profiles State
+  const [profiles, setProfiles] = useState(DEFAULT_PROFILES);
+  const [activeProfile, setActiveProfile] = useState(DEFAULT_PROFILES[0]);
 
   useEffect(() => {
     const initAuth = async () => {
       const storedUser = localStorage.getItem('netflix_user');
+      const storedProfiles = localStorage.getItem('netflix_profiles');
+      const storedActiveProfile = localStorage.getItem('netflix_active_profile');
 
       if (storedUser) {
         try {
-          setUser(JSON.parse(storedUser));
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
+          // If user has a name, sync primary profile name
+          if (parsedUser?.name) {
+            setProfiles((prev) =>
+              prev.map((p, idx) => (idx === 0 ? { ...p, name: parsedUser.name } : p))
+            );
+          }
         } catch (e) {
           localStorage.removeItem('netflix_user');
+        }
+      }
+
+      if (storedProfiles) {
+        try {
+          setProfiles(JSON.parse(storedProfiles));
+        } catch (e) {
+          localStorage.removeItem('netflix_profiles');
+        }
+      }
+
+      if (storedActiveProfile) {
+        try {
+          setActiveProfile(JSON.parse(storedActiveProfile));
+        } catch (e) {
+          localStorage.removeItem('netflix_active_profile');
         }
       }
 
@@ -38,6 +75,58 @@ export const AuthProvider = ({ children }) => {
     initAuth();
   }, []);
 
+  // Save Profiles Changes to LocalStorage
+  const updateProfilesList = (newProfilesList) => {
+    setProfiles(newProfilesList);
+    localStorage.setItem('netflix_profiles', JSON.stringify(newProfilesList));
+  };
+
+  // Add New Custom Profile
+  const addProfile = (name, isKids = false, avatarColor = 'bg-red-600') => {
+    const newProfile = {
+      id: `p_${Date.now()}`,
+      name: name.trim() || 'New Profile',
+      isKids,
+      avatarColor: avatarColor || 'bg-[#E50914]',
+    };
+    const updated = [...profiles, newProfile];
+    updateProfilesList(updated);
+    switchProfile(newProfile);
+    return newProfile;
+  };
+
+  // Switch Active Profile
+  const switchProfile = (profileOrId) => {
+    const target =
+      typeof profileOrId === 'string'
+        ? profiles.find((p) => p.id === profileOrId) || profiles[0]
+        : profileOrId;
+
+    setActiveProfile(target);
+    localStorage.setItem('netflix_active_profile', JSON.stringify(target));
+  };
+
+  // Delete Profile
+  const deleteProfile = (profileId) => {
+    if (profiles.length <= 1) return; // Keep at least one profile
+    const updated = profiles.filter((p) => p.id !== profileId);
+    updateProfilesList(updated);
+    if (activeProfile?.id === profileId) {
+      switchProfile(updated[0]);
+    }
+  };
+
+  // Edit Profile Name
+  const editProfile = (profileId, newName) => {
+    const updated = profiles.map((p) =>
+      p.id === profileId ? { ...p, name: newName.trim() } : p
+    );
+    updateProfilesList(updated);
+    if (activeProfile?.id === profileId) {
+      setActiveProfile({ ...activeProfile, name: newName.trim() });
+    }
+  };
+
   // 1. Password Login
   const loginWithPassword = async (identifier, password) => {
     try {
@@ -56,6 +145,14 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('netflix_token', data.token);
       localStorage.setItem('netflix_user', JSON.stringify(data));
       setUser(data);
+
+      if (data.name) {
+        const updated = [...profiles];
+        updated[0] = { ...updated[0], name: data.name };
+        updateProfilesList(updated);
+        switchProfile(updated[0]);
+      }
+
       return { success: true };
     } catch (error) {
       return { success: false, error: error.message || 'Server error during login' };
@@ -106,6 +203,14 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('netflix_token', data.token);
       localStorage.setItem('netflix_user', JSON.stringify(data));
       setUser(data);
+
+      if (data.name) {
+        const updated = [...profiles];
+        updated[0] = { ...updated[0], name: data.name };
+        updateProfilesList(updated);
+        switchProfile(updated[0]);
+      }
+
       return { success: true };
     } catch (error) {
       return { success: false, error: error.message || 'Server error verifying login OTP' };
@@ -156,6 +261,14 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('netflix_token', data.token);
       localStorage.setItem('netflix_user', JSON.stringify(data));
       setUser(data);
+
+      if (data.name) {
+        const updated = [...profiles];
+        updated[0] = { ...updated[0], name: data.name };
+        updateProfilesList(updated);
+        switchProfile(updated[0]);
+      }
+
       return { success: true };
     } catch (error) {
       return { success: false, error: error.message || 'Server error completing registration' };
@@ -209,15 +322,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // 8. Reset Database (Wipe All Existing Users)
+  // 8. Reset Database
   const resetDatabase = async () => {
     try {
       await fetch('/api/auth/reset-db', { method: 'POST' });
     } catch (e) {
       console.warn('Reset DB request sent');
     }
-    localStorage.removeItem('netflix_token');
-    localStorage.removeItem('netflix_user');
+    localStorage.clear();
     setUser(null);
     window.location.reload();
   };
@@ -236,11 +348,25 @@ export const AuthProvider = ({ children }) => {
     );
   };
 
+  const toggleLike = (movieId) => {
+    setLikedMovies((prev) =>
+      prev.includes(movieId)
+        ? prev.filter((id) => id !== movieId)
+        : [...prev, movieId]
+    );
+  };
+
   return (
     <AuthContext.Provider
       value={{
         user,
         loading,
+        profiles,
+        activeProfile,
+        addProfile,
+        switchProfile,
+        deleteProfile,
+        editProfile,
         loginWithPassword,
         sendLoginOtp,
         verifyLoginOtp,
@@ -252,6 +378,8 @@ export const AuthProvider = ({ children }) => {
         logout,
         watchlist,
         toggleWatchlist,
+        likedMovies,
+        toggleLike,
         apiHealth,
       }}
     >
