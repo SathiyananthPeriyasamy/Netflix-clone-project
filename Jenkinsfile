@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        // Docker Hub, SonarQube & EC2 Configuratio
+        // Docker Hub, SonarQube & EC2 Configuration
         DOCKERHUB_USER = 'sathiyananth'
         DOCKERHUB_CREDENTIALS_ID = 'Dockerhub_Cred'
         EC2_SSH_CREDENTIALS_ID = 'ec2-ssh-key'
