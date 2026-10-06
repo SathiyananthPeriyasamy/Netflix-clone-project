@@ -113,7 +113,6 @@ pipeline {
     post {
         always {
             echo '=== Cleaning up workspace ==='
-            sh 'docker system prune -af || true'
             cleanWs()
         }
         success {
