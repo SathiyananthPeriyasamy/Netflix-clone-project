@@ -76,13 +76,12 @@ pipeline {
         stage('5. Deploy to EC2 Instance') {
             steps {
                 echo '=== Deploying Updated Containers to EC2 ==='
-                sshagent([EC2_SSH_CREDENTIALS_ID]) {
+                withCredentials([sshUserPrivateKey(credentialsId: "${EC2_SSH_CREDENTIALS_ID}", keyFileVariable: 'KEY')]) {
                     sh """
-                        ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_PUBLIC_IP} '
+                        ssh -i "\${KEY}" -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_PUBLIC_IP} '
                             cd ~/Netflix-clone-project && \
                             git pull origin master && \
-                            sudo docker compose down --rmi all --volumes --remove-orphans && \
-                            sudo docker system prune -af && \
+                            sudo docker compose down --remove-orphans && \
                             sudo docker compose pull || true && \
                             sudo docker compose up -d --force-recreate
                         '
