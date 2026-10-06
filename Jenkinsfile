@@ -9,7 +9,7 @@ pipeline {
         EC2_PUBLIC_IP = '13.250.23.67'
         EC2_USER = 'ubuntu'
         
-        SONAR_URL = 'https://new-lizards-design.loca.lt'
+        SONAR_URL = 'http://localhost:9000'
         SONAR_TOKEN_CREDENTIALS_ID = 'sonarqube-token'
         
         FRONTEND_IMAGE = "${DOCKERHUB_USER}/netflix-frontend"
