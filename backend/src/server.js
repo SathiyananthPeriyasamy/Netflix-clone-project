@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { connectDB } from './config/db.js';
+import { prisma } from './config/prisma.js';
 import authRoutes from './routes/authRoutes.js';
 import movieRoutes from './routes/movieRoutes.js';
 
@@ -29,6 +29,7 @@ app.use('/api/movies', movieRoutes);
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: 'UP',
+    database: 'Amazon RDS (PostgreSQL)',
     timestamp: new Date().toISOString(),
     service: 'Netflix-Backend-API',
     environment: process.env.NODE_ENV || 'development',
@@ -39,7 +40,7 @@ app.get('/api/health', (req, res) => {
 // Root welcome endpoint
 app.get('/', (req, res) => {
   res.json({
-    message: 'Welcome to Netflix Clone DevOps REST API',
+    message: 'Welcome to Netflix Clone DevOps REST API (Powered by Amazon RDS PostgreSQL)',
     endpoints: {
       health: '/api/health',
       auth: '/api/auth',
@@ -55,7 +56,13 @@ app.use((req, res) => {
 
 // Start Server
 const startServer = async () => {
-  await connectDB();
+  try {
+    await prisma.$connect();
+    console.log('[Database] Connected successfully to Amazon RDS PostgreSQL via Prisma Client!');
+  } catch (error) {
+    console.error('[Database Error] Could not connect to Amazon RDS PostgreSQL:', error.message);
+  }
+
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`====================================================`);
     console.log(`🚀 Netflix DevOps Backend Server running on port ${PORT}`);

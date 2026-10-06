@@ -1,7 +1,7 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
-import mongoose from 'mongoose';
-import { User } from '../models/User.js';
+import bcrypt from 'bcryptjs';
+import { prisma } from '../config/prisma.js';
 import { protect } from '../middleware/authMiddleware.js';
 import { generateOTP, storeOTP, verifyOTP, sendRealtimeOTP, sendRecommendationEmail } from '../services/otpService.js';
 import { validateEmailAuthenticity } from '../services/emailValidator.js';
@@ -19,18 +19,19 @@ const generateToken = (id) => {
   );
 };
 
-const isDBConnected = () => mongoose.connection.readyState === 1;
-
 // @route   POST /api/auth/reset-db
 router.post('/reset-db', async (req, res) => {
   try {
     registeredUsersMap.clear();
-    let mongoDeleted = 0;
-    if (isDBConnected()) {
-      const result = await User.deleteMany({});
-      mongoDeleted = result.deletedCount;
+    let rdsDeleted = 0;
+    try {
+      await prisma.watchlist.deleteMany({});
+      const result = await prisma.user.deleteMany({});
+      rdsDeleted = result.count;
+    } catch (dbErr) {
+      console.warn('[DB Warn] Could not delete from RDS:', dbErr.message);
     }
-    console.log(`[Reset DB] All user accounts wiped (${mongoDeleted} from MongoDB). Starting fresh!`);
+    console.log(`[Reset DB] All user accounts wiped (${rdsDeleted} from RDS PostgreSQL). Starting fresh!`);
     return res.json({ success: true, message: 'All existing user accounts have been deleted. Database reset to clean state!' });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -42,8 +43,6 @@ router.post('/reset-db', async (req, res) => {
 // ==========================================
 
 // @route   POST /api/auth/send-signup-otp
-// @desc    Validate email authenticity & send real-time OTP to user's mail/phone (OTP is hidden from client)
-// @access  Public
 router.post('/send-signup-otp', async (req, res) => {
   try {
     const { name, email, phone, password } = req.body;
@@ -61,7 +60,7 @@ router.post('/send-signup-otp', async (req, res) => {
       return res.status(400).json({ message: 'Mobile phone number must contain only numbers and be at least 10 digits.' });
     }
 
-    // 2. PASSWORD STRENGTH VALIDATION (Min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special character)
+    // 2. PASSWORD STRENGTH VALIDATION
     const hasMinLength = password.length >= 8;
     const hasUpper = /[A-Z]/.test(password);
     const hasLower = /[a-z]/.test(password);
@@ -74,7 +73,7 @@ router.post('/send-signup-otp', async (req, res) => {
       });
     }
 
-    // 3. STRICT EMAIL AUTHENTICITY & DISPOSABLE DOMAIN CHECK
+    // 3. STRICT EMAIL AUTHENTICITY CHECK
     const emailValidation = await validateEmailAuthenticity(cleanEmail);
     if (!emailValidation.valid) {
       return res.status(400).json({ message: emailValidation.reason });
@@ -86,20 +85,22 @@ router.post('/send-signup-otp', async (req, res) => {
       LAST_REGISTERED_PHONE: cleanPhone,
     });
 
-    // 3. Check duplicate in MongoDB
-    if (isDBConnected()) {
-      const emailExists = await User.findOne({ email: cleanEmail });
+    // 5. Check duplicate in RDS PostgreSQL via Prisma
+    try {
+      const emailExists = await prisma.user.findUnique({ where: { email: cleanEmail } });
       if (emailExists) {
         return res.status(400).json({ message: `An account already exists with email (${cleanEmail}). Please sign in instead.` });
       }
 
-      const phoneExists = await User.findOne({ phone: cleanPhone });
+      const phoneExists = await prisma.user.findFirst({ where: { phone: cleanPhone } });
       if (phoneExists) {
         return res.status(400).json({ message: `An account already exists with mobile number (${cleanPhone}). Please sign in instead.` });
       }
+    } catch (dbErr) {
+      console.warn('[RDS Query Warn]:', dbErr.message);
     }
 
-    // 4. Check duplicate in in-memory registry
+    // Check duplicate in in-memory registry
     if (registeredUsersMap.has(cleanEmail)) {
       return res.status(400).json({ message: `An account already exists with email (${cleanEmail}). Please sign in instead.` });
     }
@@ -108,7 +109,7 @@ router.post('/send-signup-otp', async (req, res) => {
       return res.status(400).json({ message: `An account already exists with mobile number (${cleanPhone}). Please sign in instead.` });
     }
 
-    // 5. Generate & Dispatch Real-Time OTP for both Email and Mobile Phone
+    // 6. Generate & Dispatch Real-Time OTP
     const otp = generateOTP();
     storeOTP(cleanEmail, otp, { name, email: cleanEmail, phone: cleanPhone, password });
     storeOTP(cleanPhone, otp, { name, email: cleanEmail, phone: cleanPhone, password });
@@ -147,22 +148,28 @@ router.post('/verify-signup-otp', async (req, res) => {
     }
 
     const { name, phone, password } = result.userData || {};
+    const hashedPassword = await bcrypt.hash(password, 10);
     let userId = 'user_' + Date.now();
 
-    if (isDBConnected()) {
-      const newUser = await User.create({
-        name: name || 'Netflix User',
-        email: cleanEmail,
-        phone,
-        password,
+    try {
+      const newUser = await prisma.user.create({
+        data: {
+          name: name || 'Netflix User',
+          email: cleanEmail,
+          phone: phone || null,
+          password: hashedPassword,
+        },
       });
-      userId = newUser._id;
+      userId = newUser.id;
+      console.log(`[RDS SUCCESS] User ${name} successfully inserted into Amazon RDS PostgreSQL with ID: ${userId}`);
+    } catch (dbErr) {
+      console.error('[RDS User Create ERROR]:', dbErr);
     }
 
-    registeredUsersMap.set(cleanEmail, { name, email: cleanEmail, phone, password });
-    registeredUsersMap.set(phone, { name, email: cleanEmail, phone, password });
+    registeredUsersMap.set(cleanEmail, { name, email: cleanEmail, phone, password: hashedPassword });
+    registeredUsersMap.set(phone, { name, email: cleanEmail, phone, password: hashedPassword });
 
-    console.log(`[Account Created] User ${name} (${cleanEmail} / ${phone}) registered successfully.`);
+    console.log(`[Account Created] User ${name} (${cleanEmail} / ${phone}) registered in RDS PostgreSQL.`);
 
     return res.status(201).json({
       _id: userId,
@@ -178,7 +185,7 @@ router.post('/verify-signup-otp', async (req, res) => {
 });
 
 // ==========================================
-// 2. LOGIN WITH OTP (STRICT ACCOUNT & EMAIL CHECK)
+// 2. LOGIN WITH OTP
 // ==========================================
 
 // @route   POST /api/auth/send-login-otp
@@ -204,14 +211,18 @@ router.post('/send-login-otp', async (req, res) => {
     let userName = '';
     let userEmail = '';
 
-    if (isDBConnected()) {
-      const query = isEmail ? { email: clean } : { phone: clean };
-      const dbUser = await User.findOne(query);
+    try {
+      const dbUser = isEmail
+        ? await prisma.user.findUnique({ where: { email: clean } })
+        : await prisma.user.findFirst({ where: { phone: clean } });
+
       if (dbUser) {
         userFound = true;
         userName = dbUser.name;
         userEmail = dbUser.email;
       }
+    } catch (dbErr) {
+      console.warn('[RDS Search Warn]:', dbErr.message);
     }
 
     if (!userFound && registeredUsersMap.has(clean)) {
@@ -228,13 +239,11 @@ router.post('/send-login-otp', async (req, res) => {
     }
 
     const otp = generateOTP();
-    // Store OTP for both phone number and associated email
     storeOTP(clean, otp, { name: userName, isLogin: true });
     if (userEmail && userEmail !== clean) {
       storeOTP(userEmail, otp, { name: userName, isLogin: true });
     }
 
-    // Dispatch via SMS if phone number, via Email if email address
     const dispatchResult = await sendRealtimeOTP(clean, otp, isEmail ? 'email' : 'phone', {
       email: userEmail || clean,
       phone: clean,
@@ -273,13 +282,17 @@ router.post('/verify-login-otp', async (req, res) => {
     let userId = 'user_' + Date.now();
     let name = result.userData?.name || 'Netflix User';
 
-    if (isDBConnected()) {
-      const query = isEmail ? { email: clean } : { phone: clean };
-      const dbUser = await User.findOne(query);
+    try {
+      const dbUser = isEmail
+        ? await prisma.user.findUnique({ where: { email: clean } })
+        : await prisma.user.findFirst({ where: { phone: clean } });
+
       if (dbUser) {
-        userId = dbUser._id;
+        userId = dbUser.id;
         name = dbUser.name;
       }
+    } catch (dbErr) {
+      console.warn('[RDS Query Warn]:', dbErr.message);
     }
 
     return res.json({
@@ -295,7 +308,7 @@ router.post('/verify-login-otp', async (req, res) => {
 });
 
 // ==========================================
-// 3. LOGIN WITH PASSWORD (STRICT ACCOUNT CHECK)
+// 3. LOGIN WITH PASSWORD
 // ==========================================
 
 // @route   POST /api/auth/login
@@ -310,27 +323,27 @@ router.post('/login', async (req, res) => {
     const clean = identifier.trim().toLowerCase();
     const isEmail = clean.includes('@');
 
-    if (isDBConnected()) {
-      const query = isEmail ? { email: clean } : { phone: clean };
-      const user = await User.findOne(query);
+    try {
+      const user = isEmail
+        ? await prisma.user.findUnique({ where: { email: clean } })
+        : await prisma.user.findFirst({ where: { phone: clean } });
 
-      if (!user) {
-        return res.status(404).json({
-          message: `Account does not exist with ${identifier}. Please sign up first.`,
-        });
+      if (user) {
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (isMatch) {
+          return res.json({
+            _id: user.id,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            token: generateToken(user.id),
+          });
+        } else {
+          return res.status(401).json({ message: 'Invalid password. Please check your password or log in via OTP.' });
+        }
       }
-
-      if (await user.matchPassword(password)) {
-        return res.json({
-          _id: user._id,
-          name: user.name,
-          email: user.email,
-          phone: user.phone,
-          token: generateToken(user._id),
-        });
-      } else {
-        return res.status(401).json({ message: 'Invalid password. Please check your password or log in via OTP.' });
-      }
+    } catch (dbErr) {
+      console.warn('[RDS Auth Warn]:', dbErr.message);
     }
 
     const regUser = registeredUsersMap.get(clean);
@@ -340,7 +353,8 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    if (regUser.password === password) {
+    const isMatch = await bcrypt.compare(password, regUser.password);
+    if (isMatch || regUser.password === password) {
       const mockId = 'user_' + Date.now();
       return res.json({
         _id: mockId,
@@ -360,12 +374,38 @@ router.post('/login', async (req, res) => {
 // @route   GET /api/auth/me
 router.get('/me', protect, async (req, res) => {
   try {
-    if (isDBConnected()) {
-      const user = await User.findById(req.user._id).select('-password').populate('watchlist');
-      if (user) return res.json(user);
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: req.user.id },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          createdAt: true,
+          watchlist: {
+            include: {
+              movie: true,
+            },
+          },
+        },
+      });
+
+      if (user) {
+        return res.json({
+          _id: user.id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          watchlist: user.watchlist.map((w) => w.movie),
+        });
+      }
+    } catch (dbErr) {
+      console.warn('[RDS Profile Warn]:', dbErr.message);
     }
+
     res.json({
-      _id: req.user?._id || 'user_999',
+      _id: req.user?.id || 'user_999',
       name: req.user?.name || 'Netflix User',
       email: req.user?.email || 'devops@netflix.com',
       watchlist: [],
@@ -376,8 +416,6 @@ router.get('/me', protect, async (req, res) => {
 });
 
 // @route   POST /api/auth/send-recommendation
-// @desc    Send a movie recommendation email from no-reply@netflix.com
-// @access  Public
 router.post('/send-recommendation', async (req, res) => {
   try {
     const { email, movieTitle, description } = req.body;
@@ -401,8 +439,6 @@ router.post('/send-recommendation', async (req, res) => {
 // ==========================================
 
 // @route   POST /api/auth/send-reset-otp
-// @desc    Send password reset 6-digit OTP from no-reply@netflix.com
-// @access  Public
 router.post('/send-reset-otp', async (req, res) => {
   try {
     const { identifier } = req.body;
@@ -424,13 +460,17 @@ router.post('/send-reset-otp', async (req, res) => {
     let userFound = false;
     let targetDest = clean;
 
-    if (isDBConnected()) {
-      const query = isEmail ? { email: clean } : { phone: clean };
-      const dbUser = await User.findOne(query);
+    try {
+      const dbUser = isEmail
+        ? await prisma.user.findUnique({ where: { email: clean } })
+        : await prisma.user.findFirst({ where: { phone: clean } });
+
       if (dbUser) {
         userFound = true;
         if (!isEmail && dbUser.email) targetDest = dbUser.email;
       }
+    } catch (dbErr) {
+      console.warn('[RDS Query Warn]:', dbErr.message);
     }
 
     if (!userFound && registeredUsersMap.has(clean)) {
@@ -467,8 +507,6 @@ router.post('/send-reset-otp', async (req, res) => {
 });
 
 // @route   POST /api/auth/reset-password
-// @desc    Verify reset OTP and update user password
-// @access  Public
 router.post('/reset-password', async (req, res) => {
   try {
     const { identifier, otp, newPassword } = req.body;
@@ -497,29 +535,33 @@ router.post('/reset-password', async (req, res) => {
     }
 
     const isEmail = clean.includes('@');
-    let updatedInDB = false;
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    if (isDBConnected()) {
-      const query = isEmail ? { email: clean } : { phone: clean };
-      const user = await User.findOne(query);
+    try {
+      const user = isEmail
+        ? await prisma.user.findUnique({ where: { email: clean } })
+        : await prisma.user.findFirst({ where: { phone: clean } });
 
       if (user) {
-        user.password = newPassword;
-        await user.save();
-        updatedInDB = true;
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { password: hashedPassword },
+        });
       }
+    } catch (dbErr) {
+      console.warn('[RDS Password Reset Warn]:', dbErr.message);
     }
 
     // Update in-memory registry
     if (registeredUsersMap.has(clean)) {
       const regUser = registeredUsersMap.get(clean);
-      regUser.password = newPassword;
+      regUser.password = hashedPassword;
       registeredUsersMap.set(clean, regUser);
       if (regUser.email) registeredUsersMap.set(regUser.email, regUser);
       if (regUser.phone) registeredUsersMap.set(regUser.phone, regUser);
     }
 
-    console.log(`[Password Reset Success] Password updated for ${clean}.`);
+    console.log(`[Password Reset Success] Password updated for ${clean} in RDS PostgreSQL.`);
 
     return res.json({
       success: true,

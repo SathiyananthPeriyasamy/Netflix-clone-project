@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { User } from '../models/User.js';
+import { prisma } from '../config/prisma.js';
 
 export const protect = async (req, res, next) => {
   let token;
@@ -15,10 +15,16 @@ export const protect = async (req, res, next) => {
         process.env.JWT_SECRET || 'super_secret_netflix_jwt_key_devops_2026'
       );
 
-      req.user = await User.findById(decoded.id).select('-password');
-      if (!req.user) {
+      const user = await prisma.user.findUnique({
+        where: { id: decoded.id },
+        select: { id: true, name: true, email: true, phone: true, createdAt: true },
+      });
+
+      if (!user) {
         return res.status(401).json({ message: 'User token invalid or user deleted' });
       }
+
+      req.user = user;
       return next();
     } catch (error) {
       console.error('[Auth Middleware] Token verification failed:', error.message);

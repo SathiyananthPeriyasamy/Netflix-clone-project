@@ -1,0 +1,43 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String      @id @default(uuid())
+  name      String
+  email     String      @unique
+  phone     String?
+  password  String
+  createdAt DateTime    @default(now())
+  watchlist Watchlist[]
+}
+
+model Movie {
+  id              String      @id @default(uuid())
+  title           String
+  overview        String
+  backdropUrl     String
+  posterUrl       String
+  category        String
+  rating          Float       @default(0.0)
+  releaseYear     Int         @default(2024)
+  duration        String      @default("2h 0m")
+  genres          String[]    @default([])
+  isFeatured      Boolean     @default(false)
+  matchPercentage Int         @default(95)
+  watchlists      Watchlist[]
+}
+
+model Watchlist {
+  userId  String
+  movieId String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movie   Movie  @relation(fields: [movieId], references: [id], onDelete: Cascade)
+
+  @@id([userId, movieId])
+}

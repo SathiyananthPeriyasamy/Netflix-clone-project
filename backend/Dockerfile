@@ -7,11 +7,14 @@ WORKDIR /app
 # Copy package files first to optimize Docker layer caching
 COPY package*.json ./
 
-# Install production dependencies
-RUN npm ci --only=production
+# Install dependencies
+RUN npm install
 
 # Copy remaining backend source code
 COPY . .
+
+# Generate Prisma Client code for PostgreSQL
+RUN npx prisma generate
 
 # Expose server port
 EXPOSE 5000
