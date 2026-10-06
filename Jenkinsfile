@@ -6,10 +6,10 @@ pipeline {
         DOCKERHUB_USER = 'sathiyananth'
         DOCKERHUB_CREDENTIALS_ID = 'Dockerhub_Cred'
         EC2_SSH_CREDENTIALS_ID = 'ec2-ssh-key'
-        EC2_PUBLIC_IP = '13.50.101.1'
+        EC2_PUBLIC_IP = '13.250.23.67'
         EC2_USER = 'ubuntu'
         
-        SONAR_URL = 'http://13.50.101.1:9000'
+        SONAR_URL = 'http://13.250.23.67'
         SONAR_TOKEN_CREDENTIALS_ID = 'Sonarqube-token'
         
         FRONTEND_IMAGE = "${DOCKERHUB_USER}/netflix-frontend"
