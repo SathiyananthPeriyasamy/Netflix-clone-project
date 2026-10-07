@@ -17,6 +17,30 @@ export const AuthProvider = ({ children }) => {
   const [profiles, setProfiles] = useState(DEFAULT_PROFILES);
   const [activeProfile, setActiveProfile] = useState(DEFAULT_PROFILES[0]);
 
+  const fetchUserWatchlist = async () => {
+    const token = localStorage.getItem('netflix_token');
+    if (!token) return;
+    try {
+      const res = await fetch('/api/movies/watchlist/user', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.watchlist)) {
+          setWatchlist(data.watchlist);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching user watchlist:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchUserWatchlist();
+    }
+  }, [user]);
+
   useEffect(() => {
     const initAuth = async () => {
       const storedUser = localStorage.getItem('netflix_user');
@@ -27,6 +51,7 @@ export const AuthProvider = ({ children }) => {
         try {
           const parsedUser = JSON.parse(storedUser);
           setUser(parsedUser);
+          fetchUserWatchlist();
           // If user has a name, sync primary profile name
           if (parsedUser?.name) {
             setProfiles((prev) =>
@@ -107,6 +132,7 @@ export const AuthProvider = ({ children }) => {
 
     setActiveProfile(target);
     localStorage.setItem('netflix_active_profile', JSON.stringify(target));
+    fetchUserWatchlist();
   };
 
   // Delete Profile
