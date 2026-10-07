@@ -24,6 +24,13 @@ pipeline {
     }
 
     stages {
+        stage('0. Disk Cleanup & Prune') {
+            steps {
+                echo '=== Pruning unused Docker images and build cache to free disk space ==='
+                sh 'docker system prune -af --volumes || true'
+            }
+        }
+
         stage('1. Checkout Code') {
             steps {
                 echo '=== Pulling latest code from GitHub ==='
@@ -82,6 +89,7 @@ pipeline {
                             cd ~/Netflix-clone-project && \
                             git fetch origin master && \
                             git reset --hard origin/master && \
+                            sudo docker system prune -af --volumes || true && \
                             sudo docker compose pull || true && \
                             sudo docker compose up -d --build --force-recreate
                         '
@@ -111,8 +119,9 @@ pipeline {
 
     post {
         always {
-            echo '=== Cleaning up workspace ==='
+            echo '=== Cleaning up workspace and Docker system ==='
             cleanWs()
+            sh 'docker system prune -f || true'
         }
         success {
             echo "SUCCESS: Netflix Clone successfully built, scanned & deployed to http://${EC2_PUBLIC_IP}/"
