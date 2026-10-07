@@ -151,20 +151,16 @@ router.post('/verify-signup-otp', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     let userId = 'user_' + Date.now();
 
-    try {
-      const newUser = await prisma.user.create({
-        data: {
-          name: name || 'Netflix User',
-          email: cleanEmail,
-          phone: phone || null,
-          password: hashedPassword,
-        },
-      });
-      userId = newUser.id;
-      console.log(`[RDS SUCCESS] User ${name} successfully inserted into Amazon RDS PostgreSQL with ID: ${userId}`);
-    } catch (dbErr) {
-      console.error('[RDS User Create ERROR]:', dbErr);
-    }
+    const newUser = await prisma.user.create({
+      data: {
+        name: name || 'Netflix User',
+        email: cleanEmail,
+        phone: phone || null,
+        password: hashedPassword,
+      },
+    });
+    userId = newUser.id;
+    console.log(`[RDS SUCCESS] User ${name} successfully inserted into Amazon RDS PostgreSQL with ID: ${userId}`);
 
     registeredUsersMap.set(cleanEmail, { name, email: cleanEmail, phone, password: hashedPassword });
     registeredUsersMap.set(phone, { name, email: cleanEmail, phone, password: hashedPassword });
