@@ -268,12 +268,24 @@ const cleanMovieCatalog = [
 // @route   GET /api/movies
 router.get('/', async (req, res) => {
   try {
-    const movies = await prisma.movie.findMany();
-    if (movies && movies.length > 0) {
-      const normalized = movies.map((m) => ({ ...m, _id: m.id }));
-      return res.json(normalized);
+    const dbMovies = await prisma.movie.findMany();
+    const movieMap = new Map();
+
+    // 1. Populate full rich catalog first
+    cleanMovieCatalog.forEach((m) => {
+      const id = m.id || m._id;
+      movieMap.set(id, { ...m, id, _id: id });
+    });
+
+    // 2. Merge with any database records
+    if (dbMovies && dbMovies.length > 0) {
+      dbMovies.forEach((m) => {
+        const existing = movieMap.get(m.id) || {};
+        movieMap.set(m.id, { ...existing, ...m, _id: m.id });
+      });
     }
-    res.json(cleanMovieCatalog);
+
+    res.json(Array.from(movieMap.values()));
   } catch (error) {
     res.json(cleanMovieCatalog);
   }
