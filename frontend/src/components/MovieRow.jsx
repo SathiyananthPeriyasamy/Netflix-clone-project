@@ -49,13 +49,14 @@ export const MovieRow = ({
           className="movie-row-container flex gap-3.5 overflow-x-auto py-3 scroll-smooth no-scrollbar"
         >
           {movies.map((movie, index) => {
-            const inWatchlist = watchlist.includes(movie._id);
-            const isHovered = hoveredMovieId === movie._id;
+            const movieId = movie.id || movie._id;
+            const inWatchlist = watchlist.includes(movieId);
+            const isHovered = hoveredMovieId === movieId;
 
             return (
               <div
-                key={movie._id || movie.title}
-                onMouseEnter={() => setHoveredMovieId(movie._id)}
+                key={movieId || movie.title}
+                onMouseEnter={() => setHoveredMovieId(movieId)}
                 onMouseLeave={() => setHoveredMovieId(null)}
                 onClick={() => onSelectMovie(movie)}
                 className="relative flex-none w-44 sm:w-56 md:w-64 bg-[#181818] rounded-md overflow-hidden shadow-lg cursor-pointer transition-transform duration-300 hover:z-40 hover:scale-105"
@@ -131,7 +132,7 @@ export const MovieRow = ({
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            onToggleWatchlist && onToggleWatchlist(movie._id);
+                            onToggleWatchlist && onToggleWatchlist(movieId);
                           }}
                           className="w-8 h-8 rounded-full bg-black/60 border border-white/40 hover:border-white text-white flex items-center justify-center transition-all"
                         >

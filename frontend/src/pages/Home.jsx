@@ -410,12 +410,20 @@ export const Home = () => {
       const res = await fetch('/api/movies');
       if (res.ok) {
         const data = await res.json();
-        setMovies(data.length > 0 ? data : richNetflixCatalog);
+        const rawList = data.length > 0 ? data : richNetflixCatalog;
+        const normalized = rawList.map((m) => ({
+          ...m,
+          id: m.id || m._id,
+          _id: m._id || m.id,
+        }));
+        setMovies(normalized);
       } else {
-        setMovies(richNetflixCatalog);
+        const normalized = richNetflixCatalog.map((m) => ({ ...m, id: m._id }));
+        setMovies(normalized);
       }
     } catch (err) {
-      setMovies(richNetflixCatalog);
+      const normalized = richNetflixCatalog.map((m) => ({ ...m, id: m._id }));
+      setMovies(normalized);
     } finally {
       setLoadingMovies(false);
     }
@@ -424,8 +432,8 @@ export const Home = () => {
   const activeName = activeProfile?.name || user?.name || 'sathiya';
   const featuredMovie = movies.find((m) => m.isFeatured) || movies[0] || richNetflixCatalog[0];
 
-  const watchlistMovies = movies.filter((m) => watchlist.includes(m._id));
-  const likedListMovies = movies.filter((m) => likedMovies.includes(m._id));
+  const watchlistMovies = movies.filter((m) => watchlist.includes(m.id) || watchlist.includes(m._id));
+  const likedListMovies = movies.filter((m) => likedMovies.includes(m.id) || likedMovies.includes(m._id));
 
   // Dynamic Row Renderer based on selected Nav Tab
   const renderDynamicContent = () => {

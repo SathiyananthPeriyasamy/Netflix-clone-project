@@ -7,7 +7,8 @@ export const MovieModal = ({ movie, onClose, watchlist = [], onToggleWatchlist }
 
   if (!movie) return null;
 
-  const inWatchlist = watchlist.includes(movie._id);
+  const movieId = movie.id || movie._id;
+  const inWatchlist = watchlist.includes(movieId);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
@@ -49,7 +50,7 @@ export const MovieModal = ({ movie, onClose, watchlist = [], onToggleWatchlist }
                 </button>
 
                 <button
-                  onClick={() => onToggleWatchlist(movie._id)}
+                  onClick={() => onToggleWatchlist(movieId)}
                   className="netflix-btn-gray"
                 >
                   {inWatchlist ? <Check className="w-5 h-5 text-emerald-400" /> : <Plus className="w-5 h-5" />}

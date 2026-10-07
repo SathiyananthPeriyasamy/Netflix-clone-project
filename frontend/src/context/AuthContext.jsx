@@ -343,12 +343,35 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  const toggleWatchlist = (movieId) => {
+  const toggleWatchlist = async (movieId) => {
+    if (!movieId) return;
     setWatchlist((prev) =>
       prev.includes(movieId)
         ? prev.filter((id) => id !== movieId)
         : [...prev, movieId]
     );
+
+    const token = localStorage.getItem('netflix_token');
+    if (token) {
+      try {
+        const res = await fetch('/api/movies/watchlist/toggle', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ movieId }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.watchlist)) {
+            setWatchlist(data.watchlist);
+          }
+        }
+      } catch (err) {
+        console.error('Watchlist sync error:', err);
+      }
+    }
   };
 
   const toggleLike = (movieId) => {
