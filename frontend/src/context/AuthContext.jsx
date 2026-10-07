@@ -3,10 +3,7 @@ import React, { createContext, useState, useEffect } from 'react';
 export const AuthContext = createContext();
 
 const DEFAULT_PROFILES = [
-  { id: 'p1', name: 'sathiya', avatarColor: 'bg-sky-500', isKids: false, avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop' },
-  { id: 'p2', name: 'Gokul', avatarColor: 'bg-[#E50914]', isKids: false, avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop' },
-  { id: 'p3', name: 'Yash', avatarColor: 'bg-amber-400', isKids: false, avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop' },
-  { id: 'p4', name: 'Kids', avatarColor: 'bg-gradient-to-tr from-pink-500 via-purple-500 to-indigo-500', isKids: true },
+  { id: 'p1', name: 'User', avatarColor: 'bg-sky-500', isKids: false },
 ];
 
 export const AuthProvider = ({ children }) => {
@@ -43,7 +40,13 @@ export const AuthProvider = ({ children }) => {
 
       if (storedProfiles) {
         try {
-          setProfiles(JSON.parse(storedProfiles));
+          const parsed = JSON.parse(storedProfiles);
+          const filtered = parsed.filter(
+            (p) => !['p2', 'p3', 'p4'].includes(p.id) && !['Gokul', 'Yash', 'Kids'].includes(p.name)
+          );
+          const finalProfiles = filtered.length > 0 ? filtered : DEFAULT_PROFILES;
+          setProfiles(finalProfiles);
+          localStorage.setItem('netflix_profiles', JSON.stringify(finalProfiles));
         } catch (e) {
           localStorage.removeItem('netflix_profiles');
         }
