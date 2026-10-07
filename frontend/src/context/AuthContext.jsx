@@ -17,11 +17,12 @@ export const AuthProvider = ({ children }) => {
   const [profiles, setProfiles] = useState(DEFAULT_PROFILES);
   const [activeProfile, setActiveProfile] = useState(DEFAULT_PROFILES[0]);
 
-  const fetchUserWatchlist = async () => {
+  const fetchUserWatchlist = async (overrideProfileId) => {
     const token = localStorage.getItem('netflix_token');
     if (!token) return;
+    const profileId = overrideProfileId || activeProfile?.id || 'p1';
     try {
-      const res = await fetch('/api/movies/watchlist/user', {
+      const res = await fetch(`/api/movies/watchlist/user?profileId=${profileId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -36,10 +37,10 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    if (user) {
-      fetchUserWatchlist();
+    if (user && activeProfile?.id) {
+      fetchUserWatchlist(activeProfile.id);
     }
-  }, [user]);
+  }, [user, activeProfile?.id]);
 
   useEffect(() => {
     const initAuth = async () => {
@@ -132,7 +133,9 @@ export const AuthProvider = ({ children }) => {
 
     setActiveProfile(target);
     localStorage.setItem('netflix_active_profile', JSON.stringify(target));
-    fetchUserWatchlist();
+    if (target?.id) {
+      fetchUserWatchlist(target.id);
+    }
   };
 
   // Delete Profile
@@ -371,6 +374,8 @@ export const AuthProvider = ({ children }) => {
 
   const toggleWatchlist = async (movieId) => {
     if (!movieId) return;
+    const profileId = activeProfile?.id || 'p1';
+
     setWatchlist((prev) =>
       prev.includes(movieId)
         ? prev.filter((id) => id !== movieId)
@@ -386,7 +391,7 @@ export const AuthProvider = ({ children }) => {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ movieId }),
+          body: JSON.stringify({ movieId, profileId }),
         });
         if (res.ok) {
           const data = await res.json();

@@ -306,11 +306,25 @@ router.get('/featured', async (req, res) => {
 router.get('/watchlist/user', protect, async (req, res) => {
   try {
     const userId = req.user.id;
+    const profileId = req.query.profileId || 'p1';
+
     const items = await prisma.watchlist.findMany({
       where: { userId },
       select: { movieId: true },
     });
-    res.json({ watchlist: items.map((i) => i.movieId) });
+
+    const filteredWatchlist = items
+      .map((i) => i.movieId)
+      .filter((mId) => {
+        if (mId.includes(':::')) {
+          const [pId] = mId.split(':::');
+          return pId === profileId;
+        }
+        return profileId === 'p1';
+      })
+      .map((mId) => (mId.includes(':::') ? mId.split(':::')[1] : mId));
+
+    res.json({ watchlist: filteredWatchlist });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -334,7 +348,7 @@ router.get('/:id', async (req, res) => {
 // @route   POST /api/movies/watchlist/toggle
 router.post('/watchlist/toggle', protect, async (req, res) => {
   try {
-    const { movieId } = req.body;
+    const { movieId, profileId = 'p1' } = req.body;
     const userId = req.user.id;
 
     if (!movieId) {
@@ -365,21 +379,23 @@ router.post('/watchlist/toggle', protect, async (req, res) => {
       }
     }
 
+    const scopedMovieId = `${profileId}:::${movieId}`;
+
     const existing = await prisma.watchlist.findUnique({
       where: {
-        userId_movieId: { userId, movieId },
+        userId_movieId: { userId, movieId: scopedMovieId },
       },
     });
 
     if (existing) {
       await prisma.watchlist.delete({
         where: {
-          userId_movieId: { userId, movieId },
+          userId_movieId: { userId, movieId: scopedMovieId },
         },
       });
     } else {
       await prisma.watchlist.create({
-        data: { userId, movieId },
+        data: { userId, movieId: scopedMovieId },
       });
     }
 
@@ -388,8 +404,18 @@ router.post('/watchlist/toggle', protect, async (req, res) => {
       select: { movieId: true },
     });
 
-    const watchlistIds = userWatchlist.map((w) => w.movieId);
-    res.json({ watchlist: watchlistIds });
+    const filteredWatchlist = userWatchlist
+      .map((w) => w.movieId)
+      .filter((mId) => {
+        if (mId.includes(':::')) {
+          const [pId] = mId.split(':::');
+          return pId === profileId;
+        }
+        return profileId === 'p1';
+      })
+      .map((mId) => (mId.includes(':::') ? mId.split(':::')[1] : mId));
+
+    res.json({ watchlist: filteredWatchlist });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
