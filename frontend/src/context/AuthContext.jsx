@@ -455,9 +455,16 @@ export const AuthProvider = ({ children }) => {
       if (error.code === 'auth/popup-closed-by-user') {
         return { success: false, error: 'Sign-in popup was closed before completing.' };
       }
+      if (error.code === 'auth/api-key-not-valid' || error.code === 'auth/invalid-api-key' || error.message?.includes('api-key-not-valid')) {
+        return {
+          success: false,
+          error: 'Firebase Setup Required: Please configure your Firebase Web API Key (VITE_FIREBASE_API_KEY) in frontend/.env to enable live Google authentication.',
+        };
+      }
       return { success: false, error: error.message || 'Server error during Google Sign-In' };
     }
   };
+
 
   return (
     <AuthContext.Provider
