@@ -6,7 +6,7 @@ pipeline {
         DOCKERHUB_USER = 'sathiyananth'
         DOCKERHUB_CREDENTIALS_ID = 'Dockerhub_Cred'
         EC2_SSH_CREDENTIALS_ID = 'ec2-ssh-key'
-        EC2_PUBLIC_IP = '13.228.77.106'
+        EC2_PUBLIC_IP = '47.128.227.42'
         EC2_USER = 'ubuntu'
         
         SONAR_URL = 'http://localhost:9000'
