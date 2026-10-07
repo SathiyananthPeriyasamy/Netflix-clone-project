@@ -3,6 +3,7 @@ services:
   # Service 1: Express REST API Backend (Amazon RDS PostgreSQL)
   # ==========================================
   backend:
+    image: sathiyananth/netflix-backend:latest
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -30,6 +31,7 @@ services:
   # Service 2: React Frontend + Nginx Web Server
   # ==========================================
   frontend:
+    image: sathiyananth/netflix-frontend:latest
     build:
       context: ./frontend
       dockerfile: Dockerfile

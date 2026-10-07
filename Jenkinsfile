@@ -81,9 +81,8 @@ pipeline {
                         ssh -i "\${KEY}" -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_PUBLIC_IP} '
                             cd ~/Netflix-clone-project && \
                             git pull origin master && \
-                            sudo docker compose down --remove-orphans && \
                             sudo docker compose pull || true && \
-                            sudo docker compose up -d --force-recreate
+                            sudo docker compose up -d --build --force-recreate
                         '
                     """
                 }
