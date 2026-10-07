@@ -1,6 +1,9 @@
 import React, { createContext, useState, useEffect } from 'react';
+import { signInWithPopup } from 'firebase/auth';
+import { auth, googleProvider } from '../firebase';
 
 export const AuthContext = createContext();
+
 
 const DEFAULT_PROFILES = [
   { id: 'p1', name: 'User', avatarColor: 'bg-sky-500', isKids: false },
@@ -413,6 +416,49 @@ export const AuthProvider = ({ children }) => {
     );
   };
 
+  // 9. Google Sign-In with Firebase
+  const loginWithGoogle = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const googleUser = result.user;
+
+      const response = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: googleUser.email,
+          name: googleUser.displayName || googleUser.email?.split('@')[0] || 'Google User',
+          googleId: googleUser.uid,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return { success: false, error: data.message || 'Google Authentication failed on server.' };
+      }
+
+      localStorage.setItem('netflix_token', data.token);
+      localStorage.setItem('netflix_user', JSON.stringify(data));
+      setUser(data);
+
+      if (data.name) {
+        const updated = [...profiles];
+        updated[0] = { ...updated[0], name: data.name };
+        updateProfilesList(updated);
+        switchProfile(updated[0]);
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Google Auth Error:', error);
+      if (error.code === 'auth/popup-closed-by-user') {
+        return { success: false, error: 'Sign-in popup was closed before completing.' };
+      }
+      return { success: false, error: error.message || 'Server error during Google Sign-In' };
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -437,6 +483,7 @@ export const AuthProvider = ({ children }) => {
         toggleWatchlist,
         likedMovies,
         toggleLike,
+        loginWithGoogle,
         apiHealth,
       }}
     >
@@ -444,3 +491,4 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
+
