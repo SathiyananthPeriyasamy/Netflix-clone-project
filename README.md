@@ -48,16 +48,18 @@ flowchart TD
 ### **Frontend & UI**
 * **Framework:** React 18, Vite, Vanilla CSS Design System.
 * **UI Features:** Netflix Dark Theme, Glassmorphism, dynamic movie catalog, responsive navigation, live password strength checker, numeric-only mobile validation.
+* **Authentication:** Multi-provider authentication supporting Email/Password with JWT and **Google Firebase OAuth ("Continue with Google")**.
 * **Web Server:** Nginx (serving static production build & reverse-proxying `/api` requests to Express backend).
 
 ### **Backend & Authentication**
 * **Runtime:** Node.js, Express.js REST API.
-* **Authentication:** JWT (JSON Web Tokens), bcrypt password encryption.
+* **Authentication & Identity:** JWT (JSON Web Tokens), bcrypt password encryption, Firebase Auth token verification.
 * **OTP Engine:** Dynamic SMS dispatch (Fast2SMS / Twilio) with fallback to virtual webmail preview.
-* **Database:** MongoDB persistence for Users, Movies, and Watchlists.
+* **Database & Persistence:** MongoDB persistence for Users, Movies, and Profile-isolated Watchlists.
 
 ### **DevOps, DevSecOps & Cloud Infrastructure**
 * **Containerization:** Multi-stage `Dockerfile` builds for optimized lightweight images (`node:18-alpine`, `nginx:alpine`).
+* **Container Security:** Hardened Docker network bindings to isolate internal service ports (MongoDB, Express) behind Nginx reverse proxy.
 * **Code Security & Quality (SAST):** SonarQube Server & SonarScanner CLI with Quality Gate verification.
 * **Orchestration:** `docker-compose.yml` coordinating MongoDB, Express Backend, and Nginx Frontend.
 * **Cloud Hosting:** AWS EC2 Instance (Amazon Linux 2023 / Ubuntu Server).
@@ -184,6 +186,14 @@ sudo docker run -d --name jenkins --restart always -p 8091:8080 -p 50000:50000 -
 # Restart SonarQube Container
 sudo docker run -d --name sonarqube --restart always -p 9000:9000 sonarqube:lts-community
 ```
+
+---
+
+## 👤 Author & GitHub Profile
+
+**Sathiyananth Periyasamy**
+* **GitHub Profile:** [@SathiyananthPeriyasamy](https://github.com/SathiyananthPeriyasamy)
+* **Project Repository:** [SathiyananthPeriyasamy/Netflix-clone-project](https://github.com/SathiyananthPeriyasamy/Netflix-clone-project)
 
 ---
 

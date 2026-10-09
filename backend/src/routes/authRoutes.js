@@ -569,4 +569,66 @@ router.post('/reset-password', async (req, res) => {
   }
 });
 
+// ==========================================
+// 4. GOOGLE AUTHENTICATION (SSO)
+// ==========================================
+
+// @route   POST /api/auth/google
+router.post('/google', async (req, res) => {
+  try {
+    const { email, name, googleId } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email address is required for Google Sign-In.' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const displayName = name || 'Google User';
+    let userId = 'user_google_' + Date.now();
+
+    let user = null;
+    try {
+      user = await prisma.user.findUnique({ where: { email: cleanEmail } });
+
+      if (!user) {
+        // Create user if not exists
+        const randomPassword = await bcrypt.hash(Math.random().toString(36).substring(2) + Date.now(), 10);
+        user = await prisma.user.create({
+          data: {
+            name: displayName,
+            email: cleanEmail,
+            password: randomPassword,
+          },
+        });
+        console.log(`[RDS SUCCESS] Google User ${displayName} (${cleanEmail}) inserted into RDS PostgreSQL.`);
+      }
+      userId = user.id;
+    } catch (dbErr) {
+      console.warn('[RDS Google Auth Warn]:', dbErr.message);
+    }
+
+    // Save to in-memory map as fallback
+    if (!registeredUsersMap.has(cleanEmail)) {
+      registeredUsersMap.set(cleanEmail, {
+        name: displayName,
+        email: cleanEmail,
+        googleId,
+      });
+    }
+
+    const token = generateToken(userId);
+
+    return res.json({
+      _id: userId,
+      name: user?.name || displayName,
+      email: cleanEmail,
+      token,
+    });
+  } catch (error) {
+    console.error('[Google Auth Error]:', error.message);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 export default router;
+

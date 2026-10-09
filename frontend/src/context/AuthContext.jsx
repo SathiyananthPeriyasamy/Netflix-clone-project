@@ -90,7 +90,10 @@ export const AuthProvider = ({ children }) => {
       }
 
       try {
-        const res = await fetch('/api/health');
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        const res = await fetch('/api/health', { signal: controller.signal });
+        clearTimeout(timeoutId);
         if (res.ok) {
           const data = await res.json();
           setApiHealth(data);

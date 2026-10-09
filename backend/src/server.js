@@ -56,19 +56,19 @@ app.use((req, res) => {
 
 // Start Server
 const startServer = async () => {
-  try {
-    await prisma.$connect();
-    console.log('[Database] Connected successfully to Amazon RDS PostgreSQL via Prisma Client!');
-  } catch (error) {
-    console.error('[Database Error] Could not connect to Amazon RDS PostgreSQL:', error.message);
-  }
-
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`====================================================`);
     console.log(`🚀 Netflix DevOps Backend Server running on port ${PORT}`);
     console.log(`📡 Healthcheck URL: http://localhost:${PORT}/api/health`);
     console.log(`====================================================`);
   });
+
+  try {
+    await prisma.$connect();
+    console.log('[Database] Connected successfully to Amazon RDS PostgreSQL via Prisma Client!');
+  } catch (error) {
+    console.error('[Database Error] Could not connect to Amazon RDS PostgreSQL:', error.message);
+  }
 };
 
 startServer();
